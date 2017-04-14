@@ -26,7 +26,7 @@ class Player {
             // Edit this line to output the target position
             // and thrust (0 <= thrust <= 100)
             // i.e.: "x y thrust"
-            System.out.println(nextCheckpointX + " " + nextCheckpointY + " 50");
+            System.out.println(nextCheckpointX + " " + nextCheckpointY + " 100");
 
 
         }
