@@ -4,47 +4,69 @@ import java.math.*;
 
 class Player {
 
-	static class Point {
-		int x;
-		int y;
-	}
-
-	static Point playerPod = new Point();
-	static Point opponentPod = new Point();
-	
-	static Point nextCheckpoint = new Point();
-	
-	static boolean isBoostUsed = false;
-
 	public static void main(String args[]) {
+
+		// OBJECTS
+		Point playerPod;
+		Point opponentPod;
+		Point nextCheckpoint;
+		GameState gameState = new GameState();
+
 		Scanner in = new Scanner(System.in);
 
 		// game loop
 		while (true) {
-			playerPod.x = in.nextInt();
-			playerPod.y = in.nextInt();
-			nextCheckpoint.x = in.nextInt();
-			nextCheckpoint.y = in.nextInt();
+			playerPod = new Point(in.nextInt(), in.nextInt());
+			nextCheckpoint = new Point(in.nextInt(), in.nextInt());
 			int nextCheckpointDistance = in.nextInt();
 			int nextCheckpointAngle = in.nextInt();
-			opponentPod.x = in.nextInt();
-			opponentPod.y = in.nextInt();
+			opponentPod = new Point(in.nextInt(), in.nextInt());
 
-			// Write an action using System.out.println()
-			// To debug: System.err.println("Debug messages...");
+			gameState.turn++;
 
-			int meNewX = nextCheckpoint.x;
-			int meNewY = nextCheckpoint.y;
-			int meNewThrust = compute_thrust(nextCheckpointAngle);
+			Move nextMove = new Move();
+			nextMove.x = nextCheckpoint.x;
+			nextMove.y = nextCheckpoint.y;
+			nextMove.thrust = compute_thrust(nextCheckpointAngle);
+			nextMove.useBoost = isOkToBoost(gameState, nextCheckpointDistance, nextCheckpointAngle);
 
-			System.err.println("Debug messages... nextCheckpointDistance=" + nextCheckpointDistance);
-			System.err.println("Debug messages... nextCheckpointAngle=" + nextCheckpointAngle);
+			debug("nextCheckpointDistance=" + nextCheckpointDistance);
+			debug("nextCheckpointAngle=" + nextCheckpointAngle);
 
-			System.err.println("Debug messages... meNewX=" + meNewX);
-			System.err.println("Debug messages... meNewY=" + meNewY);
-			System.err.println("Debug messages... meNewThrust=" + meNewThrust);
+			debug("gameState.turn=" + gameState.turn);
+			debug("gameState.isBoostUsed=" + gameState.isBoostUsed);
 
-			output_X_Y_T(meNewX, meNewY, meNewThrust);
+			debug("nextMove.x=" + nextMove.x);
+			debug("nextMove.y=" + nextMove.x);
+			debug("nextMove.thrust=" + nextMove.thrust);
+			debug("nextMove.useBoost=" + nextMove.useBoost);
+
+			play(nextMove);
+		}
+	}
+
+	// FUNCTIONS UTILS
+
+	private static void debug(String str) {
+		System.err.println(str);
+	}
+
+	static class Preconditions {
+		static void check(boolean condition) {
+			if (!condition)
+				throw new RuntimeException("CONDITION FALSE");
+		}
+	}
+
+	// FUNCTIONS BOT
+
+	static void play(Move move) {
+		if (move.useBoost)
+			System.out.println(move.x + " " + move.y + " BOOST");
+		else {
+			Preconditions.check(0 <= move.thrust);
+			Preconditions.check(move.thrust <= 100);
+			System.out.println(move.x + " " + move.y + " " + move.thrust);
 		}
 	}
 
@@ -58,22 +80,36 @@ class Player {
 		return thrust;
 	}
 
-	static void output_X_Y_T(int x, int y, int thrust) {
-		Preconditions.check(0 <= thrust);
-		Preconditions.check(thrust <= 100);
-		if (isBoostUsed)
-			System.out.println(x + " " + y + " " + thrust);
-		else {
-			System.out.println(x + " " + y + " BOOST");
-			isBoostUsed = true;
+	static boolean isOkToBoost(GameState gameState, int distance, int angle) {
+		if (gameState.isBoostUsed)
+			return false;
+		gameState.isBoostUsed = true;
+		boolean isFacingIt = (angle == 0);
+		boolean isDistanceEnough = (distance > 7000);
+		return isFacingIt && isDistanceEnough;
+	}
+
+	// CLASSES
+
+	static class Point {
+		int x;
+		int y;
+
+		public Point(int x, int y) {
+			this.x = x;
+			this.y = y;
 		}
 	}
 
-	static class Preconditions {
-		static void check(boolean condition) {
-			if (!condition)
-				throw new RuntimeException("CONDITION FALSE");
-		}
+	static class Move {
+		int x;
+		int y;
+		int thrust;
+		boolean useBoost;
 	}
 
+	static class GameState {
+		int turn = 0;
+		boolean isBoostUsed = false;
+	}
 }
