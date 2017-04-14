@@ -8,41 +8,65 @@ import java.math.*;
  **/
 class Player {
 
+	static class Point {
+		int x;
+		int y;
+	}
+
+	static Point myPod = new Point();
+	static Point opponentPod = new Point();
+	static Point nextCheckpoint = new Point();
+
 	public static void main(String args[]) {
-		Scanner in = new Scanner(System.in);
+		try (Scanner in = new Scanner(System.in)) {
 
-		// game loop
-		while (true) {
-			int x = in.nextInt();
-			int y = in.nextInt();
-			int nextCheckpointX = in.nextInt(); // x position of the next check
-												// point
-			int nextCheckpointY = in.nextInt(); // y position of the next check
-												// point
-			int nextCheckpointDist = in.nextInt(); // distance to the next
-													// checkpoint
-			int nextCheckpointAngle = in.nextInt(); // angle between your pod
-													// orientation and the
-													// direction of the next
-													// checkpoint
-			int opponentX = in.nextInt();
-			int opponentY = in.nextInt();
+			// game loop
+			while (true) {
+				myPod.x = in.nextInt();
+				myPod.y = in.nextInt();
+				nextCheckpoint.x = in.nextInt();
+				nextCheckpoint.y = in.nextInt();
+				int nextCheckpointDistance = in.nextInt();
+				int nextCheckpointAngleBetweenPodNextCheckPoint = in.nextInt();
+				opponentPod.x = in.nextInt();
+				opponentPod.y = in.nextInt();
 
-			// thrust algo
-			int thrust = 0;
-			if ((nextCheckpointAngle > 90) || (nextCheckpointAngle < -90)) {
-				thrust = 0;
-			} else {
-				thrust = 100;
+				// Write an action using System.out.println()
+				// To debug: System.err.println("Debug messages...");
+
+				int meNewX = nextCheckpoint.x;
+				int meNewY = nextCheckpoint.y;
+				int meNewThrust = compute_thrust(nextCheckpointAngleBetweenPodNextCheckPoint);
+
+				System.err.println("Debug messages... meNewX=" + meNewX);
+				System.err.println("Debug messages... meNewY=" + meNewY);
+				System.err.println("Debug messages... meNewThrust=" + meNewThrust);
+				output_X_Y_T(meNewX, meNewY, meNewThrust);
 			}
-
-			// Write an action using System.out.println()
-			// To debug: System.err.println("Debug messages...");
-
-			// You have to output the target position
-			// followed by the power (0 <= thrust <= 100)
-			// i.e.: "x y thrust"
-			System.out.println(nextCheckpointX + " " + nextCheckpointY + " " + thrust);
 		}
 	}
+
+	private static int compute_thrust(int nextCheckpointAngleBetweenPodNextCheckPoint) {
+		int thrust = 0;
+		if ((nextCheckpointAngleBetweenPodNextCheckPoint > 90) || (nextCheckpointAngleBetweenPodNextCheckPoint < -90)) {
+			thrust = 0;
+		} else {
+			thrust = 100;
+		}
+		return thrust;
+	}
+
+	static void output_X_Y_T(int x, int y, int thrust) {
+		Preconditions.check(0 <= thrust);
+		Preconditions.check(thrust <= 100);
+		System.out.println(x + " " + y + " " + thrust);
+	}
+
+	static class Preconditions {
+		static void check(boolean condition) {
+			if (!condition)
+				throw new RuntimeException("CONDITION FALSE");
+		}
+	}
+
 }
