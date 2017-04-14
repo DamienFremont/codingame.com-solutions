@@ -2,10 +2,6 @@ import java.util.*;
 import java.io.*;
 import java.math.*;
 
-/**
- * Auto-generated code below aims at helping you parse the standard input
- * according to the problem statement.
- **/
 class Player {
 
 	static class Point {
@@ -13,36 +9,42 @@ class Player {
 		int y;
 	}
 
-	static Point myPod = new Point();
+	static Point playerPod = new Point();
 	static Point opponentPod = new Point();
+	
 	static Point nextCheckpoint = new Point();
+	
+	static boolean isBoostUsed = false;
 
 	public static void main(String args[]) {
-		try (Scanner in = new Scanner(System.in)) {
+		Scanner in = new Scanner(System.in);
 
-			// game loop
-			while (true) {
-				myPod.x = in.nextInt();
-				myPod.y = in.nextInt();
-				nextCheckpoint.x = in.nextInt();
-				nextCheckpoint.y = in.nextInt();
-				int nextCheckpointDistance = in.nextInt();
-				int nextCheckpointAngleBetweenPodNextCheckPoint = in.nextInt();
-				opponentPod.x = in.nextInt();
-				opponentPod.y = in.nextInt();
+		// game loop
+		while (true) {
+			playerPod.x = in.nextInt();
+			playerPod.y = in.nextInt();
+			nextCheckpoint.x = in.nextInt();
+			nextCheckpoint.y = in.nextInt();
+			int nextCheckpointDistance = in.nextInt();
+			int nextCheckpointAngle = in.nextInt();
+			opponentPod.x = in.nextInt();
+			opponentPod.y = in.nextInt();
 
-				// Write an action using System.out.println()
-				// To debug: System.err.println("Debug messages...");
+			// Write an action using System.out.println()
+			// To debug: System.err.println("Debug messages...");
 
-				int meNewX = nextCheckpoint.x;
-				int meNewY = nextCheckpoint.y;
-				int meNewThrust = compute_thrust(nextCheckpointAngleBetweenPodNextCheckPoint);
+			int meNewX = nextCheckpoint.x;
+			int meNewY = nextCheckpoint.y;
+			int meNewThrust = compute_thrust(nextCheckpointAngle);
 
-				System.err.println("Debug messages... meNewX=" + meNewX);
-				System.err.println("Debug messages... meNewY=" + meNewY);
-				System.err.println("Debug messages... meNewThrust=" + meNewThrust);
-				output_X_Y_T(meNewX, meNewY, meNewThrust);
-			}
+			System.err.println("Debug messages... nextCheckpointDistance=" + nextCheckpointDistance);
+			System.err.println("Debug messages... nextCheckpointAngle=" + nextCheckpointAngle);
+
+			System.err.println("Debug messages... meNewX=" + meNewX);
+			System.err.println("Debug messages... meNewY=" + meNewY);
+			System.err.println("Debug messages... meNewThrust=" + meNewThrust);
+
+			output_X_Y_T(meNewX, meNewY, meNewThrust);
 		}
 	}
 
@@ -59,7 +61,12 @@ class Player {
 	static void output_X_Y_T(int x, int y, int thrust) {
 		Preconditions.check(0 <= thrust);
 		Preconditions.check(thrust <= 100);
-		System.out.println(x + " " + y + " " + thrust);
+		if (isBoostUsed)
+			System.out.println(x + " " + y + " " + thrust);
+		else {
+			System.out.println(x + " " + y + " BOOST");
+			isBoostUsed = true;
+		}
 	}
 
 	static class Preconditions {
