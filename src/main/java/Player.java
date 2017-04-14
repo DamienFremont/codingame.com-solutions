@@ -7,47 +7,36 @@ class Player {
 	public static void main(String args[]) {
 
 		// OBJECTS
-		Point playerPod;
-		Point opponentPod;
-		Point nextCheckpoint;
+		Point playerPod = new Point();
+		Point opponentPod = new Point();
+		Point nextCheckpoint = new Point();
 		GameState gameState = new GameState();
 
 		Scanner in = new Scanner(System.in);
 
 		// game loop
 		while (true) {
-			playerPod = new Point(in.nextInt(), in.nextInt());
-			nextCheckpoint = new Point(in.nextInt(), in.nextInt());
-			int nextCheckpointDistance = in.nextInt();
-			int nextCheckpointAngle = in.nextInt();
-			opponentPod = new Point(in.nextInt(), in.nextInt());
+			playerPod.x = in.nextInt();
+			playerPod.y = in.nextInt();
+			nextCheckpoint.x = in.nextInt();
+			nextCheckpoint.y = in.nextInt();
+			gameState.nextCheckpointDistance = in.nextInt();
+			gameState.nextCheckpointAngle = in.nextInt();
+			opponentPod.x = in.nextInt();
+			opponentPod.y = in.nextInt();
 
 			gameState.turn++;
 
-			Move nextMove = new Move();
-			nextMove.x = nextCheckpoint.x;
-			nextMove.y = nextCheckpoint.y;
-			nextMove.thrust = compute_thrust(nextCheckpointAngle);
-			nextMove.useBoost = isOkToBoost(gameState, nextCheckpointDistance, nextCheckpointAngle);
+			Move nextMove = compute(nextCheckpoint, gameState);
 
-			debug("nextCheckpointDistance=" + nextCheckpointDistance);
-			debug("nextCheckpointAngle=" + nextCheckpointAngle);
-
-			debug("gameState.turn=" + gameState.turn);
-			debug("gameState.isBoostUsed=" + gameState.isBoostUsed);
-
-			debug("nextMove.x=" + nextMove.x);
-			debug("nextMove.y=" + nextMove.x);
-			debug("nextMove.thrust=" + nextMove.thrust);
-			debug("nextMove.useBoost=" + nextMove.useBoost);
-
+			debug(gameState, nextMove);
 			play(nextMove);
 		}
 	}
 
 	// FUNCTIONS UTILS
 
-	private static void debug(String str) {
+	static void debug(String str) {
 		System.err.println(str);
 	}
 
@@ -58,6 +47,18 @@ class Player {
 		}
 	}
 
+	static void debug(GameState gameState, Move nextMove) {
+		debug("gameState.turn=" + gameState.turn);
+		debug("gameState.isBoostUsed=" + gameState.isBoostUsed);
+
+		debug("gameState.nextCheckpointDistance=" + gameState.nextCheckpointDistance);
+		debug("gameState.nextCheckpointAngle=" + gameState.nextCheckpointAngle);
+
+		debug("nextMove.x=" + nextMove.x);
+		debug("nextMove.y=" + nextMove.x);
+		debug("nextMove.thrust=" + nextMove.thrust);
+		debug("nextMove.useBoost=" + nextMove.useBoost);
+	}
 	// FUNCTIONS BOT
 
 	static void play(Move move) {
@@ -70,23 +71,40 @@ class Player {
 		}
 	}
 
-	private static int compute_thrust(int nextCheckpointAngleBetweenPodNextCheckPoint) {
+	static Move compute(Point nextCheckpoint, GameState gameState) {
+		Move nextMove = new Move();
+		nextMove.x = nextCheckpoint.x;
+		nextMove.y = nextCheckpoint.y;
+		nextMove.thrust = compute_thrust(gameState);
+		nextMove.useBoost = isOkToBoost(gameState);
+		return nextMove;
+	}
+
+	static int compute_thrust(GameState gameState) {
 		int thrust = 0;
-		if ((nextCheckpointAngleBetweenPodNextCheckPoint > 90) || (nextCheckpointAngleBetweenPodNextCheckPoint < -90)) {
+		boolean isReversedRight = gameState.nextCheckpointAngle > 90;
+		boolean isReversedLeft = gameState.nextCheckpointAngle < -90;
+		boolean isReversed = isReversedRight || isReversedLeft;
+		boolean isAproachingTooFast = gameState.nextCheckpointDistance < 1000;
+		if (isReversed) {
 			thrust = 0;
+		} else if (isAproachingTooFast) {
+			thrust = 20;
 		} else {
 			thrust = 100;
 		}
 		return thrust;
 	}
 
-	static boolean isOkToBoost(GameState gameState, int distance, int angle) {
+	static boolean isOkToBoost(GameState gameState) {
 		if (gameState.isBoostUsed)
 			return false;
-		gameState.isBoostUsed = true;
-		boolean isFacingIt = (angle == 0);
-		boolean isDistanceEnough = (distance > 7000);
-		return isFacingIt && isDistanceEnough;
+		boolean isFacingIt = (gameState.nextCheckpointAngle == 0);
+		boolean isDistanceEnough = (gameState.nextCheckpointDistance > 7000);
+		boolean isOkToBoost = isFacingIt && isDistanceEnough;
+		if (gameState.isBoostUsed)
+			gameState.isBoostUsed = true;
+		return isOkToBoost;
 	}
 
 	// CLASSES
@@ -94,11 +112,6 @@ class Player {
 	static class Point {
 		int x;
 		int y;
-
-		public Point(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
 	}
 
 	static class Move {
@@ -111,5 +124,8 @@ class Player {
 	static class GameState {
 		int turn = 0;
 		boolean isBoostUsed = false;
+
+		int nextCheckpointDistance;
+		int nextCheckpointAngle;
 	}
 }
