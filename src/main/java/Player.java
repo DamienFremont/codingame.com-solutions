@@ -18,15 +18,71 @@ class Player {
 
 		// game loop
 		while (true) {
-			int myShipCount = in.nextInt(); // the number of remaining ships
-			int entityCount = in.nextInt(); // the number of entities (e.g.
-											// ships, mines or cannonballs)
+			int myShipCount = in.nextInt();
+			int entityCount = in.nextInt();
 			List<Entity> entities = init(in, entityCount);
+			gameState.nextBarrel = (Barrel) entities.get(2);
 			gameState.turn++;
-			debug(gameState, entities, "MOVE 11 10");
+
+			Barrel nextBarrel = compute_nextBarrel(entities, gameState.nextBarrel);
+			debug(gameState, entities);
 			for (int i = 0; i < myShipCount; i++) {
-				play("MOVE 11 10");
+				// Any valid action, such as "WAIT" or
+				// "MOVE x y"
+				String action = String.format("MOVE %d %d", nextBarrel.x, nextBarrel.y);
+				debug("ship " + i + " action=" + action);
+				play(action);
 			}
+		}
+	}
+
+	// FUNCTIONS BOT
+
+	private static Barrel compute_nextBarrel(List<Entity> entities, Barrel nextBarrel) {
+		Preconditions.check(nextBarrel!=null);
+		boolean isBarrelStillExist = false;
+		Barrel bestBarrel = null;
+		for (Entity i : entities) {
+			Preconditions.check(i!=null);
+			if (i instanceof Barrel) {
+				bestBarrel = (Barrel) i;
+				if (isSameCoord(nextBarrel, i)) {
+					isBarrelStillExist = true;
+				}
+			}
+		}
+		if (isBarrelStillExist)
+			return nextBarrel;
+		else
+			return bestBarrel;
+	}
+
+	private static boolean isSameCoord(Entity y, Entity i) {
+		return (i.x == y.x) && (i.y == y.y);
+	}
+
+	static void play(String action) {
+		System.out.println(action);
+	}
+
+	// FUNCTIONS UTILS
+
+	static void debug(String str) {
+		System.err.println(str);
+	}
+
+	static class Preconditions {
+		static void check(boolean condition) {
+			if (!condition)
+				throw new RuntimeException("CONDITION FALSE");
+		}
+	}
+
+	static void debug(GameState gameState, List<Entity> entities) {
+		debug("gameState.turn=" + gameState.turn);
+		debug("gameState.nextBarrel=" + gameState.nextBarrel);
+		for (Entity entity : entities) {
+			debug("entity=" + entity.toString());
 		}
 	}
 
@@ -69,34 +125,6 @@ class Player {
 			}
 		}
 		return entities;
-	}
-
-	// FUNCTIONS UTILS
-
-	static void debug(String str) {
-		System.err.println(str);
-	}
-
-	static class Preconditions {
-		static void check(boolean condition) {
-			if (!condition)
-				throw new RuntimeException("CONDITION FALSE");
-		}
-	}
-
-	static void debug(GameState gameState, List<Entity> entities, String action) {
-		debug("gameState.turn=" + gameState.turn);
-		for (Entity entity : entities) {
-			debug("entity=" + entity.toString());
-		}
-		debug("action=" + action);
-	}
-
-	// FUNCTIONS BOT
-
-	static void play(String action) {
-		System.out.println(action); // Any valid action, such as "WAIT" or
-									// "MOVE x y"
 	}
 
 	// CLASSES
@@ -143,5 +171,6 @@ class Player {
 
 	static class GameState {
 		int turn = 0;
+		Barrel nextBarrel;
 	}
 }
