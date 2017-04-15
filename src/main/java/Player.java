@@ -1,176 +1,195 @@
 import java.util.*;
-
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.io.*;
 import java.math.*;
 
-/**
- * Auto-generated code below aims at helping you parse the standard input
- * according to the problem statement.
- **/
+// MAIN
+
 class Player {
 
 	public static void main(String args[]) {
-
-		// OBJECTS
-		GameState gameState = new GameState();
-
+		IA bot = new IA();
+		Game game = new Game();
 		Scanner in = new Scanner(System.in);
-
-		// game loop
 		while (true) {
-			int myShipCount = in.nextInt();
-			int entityCount = in.nextInt();
-			List<Entity> entities = init(in, entityCount);
-			gameState.nextBarrel = (Barrel) entities.get(2);
-			gameState.turn++;
+			long startTime = System.currentTimeMillis();
+			game.update(in);
+			bot.play(game);
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			Engine.debug(String.format("elapsedTime= %d ms", elapsedTime));
+		}
+	}
+}
 
-			Barrel nextBarrel = compute_nextBarrel(entities, gameState.nextBarrel);
-			debug(gameState, entities);
-			for (int i = 0; i < myShipCount; i++) {
-				// Any valid action, such as "WAIT" or
-				// "MOVE x y"
-				String action = String.format("MOVE %d %d", nextBarrel.x, nextBarrel.y);
-				debug("ship " + i + " action=" + action);
-				play(action);
+// BOT
+
+class IA {
+
+	public void play(Game game) {
+		for (Entry<Integer, Entity> e : game.myShips.entrySet()) {
+			Entity ship = e.getValue();
+			ActionType nextAction = compute_nextAction(game, ship);
+			String action;
+			if(nextAction == ActionType.MOVE) {
+				Entity nextBarrel = compute_nextBarrel(game, ship);
+				action = String.format("%s %d %d", nextAction, nextBarrel.x, nextBarrel.y);
+			} else {
+				action = String.format("%s", nextAction);
 			}
+			Engine.debug("ship " + ship.id + " action=" + action);
+			System.out.println(action);
 		}
 	}
 
-	// FUNCTIONS BOT
-
-	private static Barrel compute_nextBarrel(List<Entity> entities, Barrel nextBarrel) {
-		Preconditions.check(nextBarrel!=null);
-		boolean isBarrelStillExist = false;
-		Barrel bestBarrel = null;
-		for (Entity i : entities) {
-			Preconditions.check(i!=null);
-			if (i instanceof Barrel) {
-				bestBarrel = (Barrel) i;
-				if (isSameCoord(nextBarrel, i)) {
-					isBarrelStillExist = true;
-				}
-			}
-		}
-		if (isBarrelStillExist)
-			return nextBarrel;
-		else
-			return bestBarrel;
+	public ActionType compute_nextAction(Game game, Entity ship) {
+		return game.barrels.isEmpty() ? ActionType.WAIT : ActionType.MOVE;
 	}
 
-	private static boolean isSameCoord(Entity y, Entity i) {
+	public Entity compute_nextBarrel(Game game, Entity ship) {
+		Preconditions.check(!game.barrels.isEmpty());
+		Entity nextBarrel;
+		game.barrels.entrySet() //
+				.stream() //
+				.forEach(e -> e.getValue().distance = distanceBetween(e.getValue(), ship));
+		Entity nearestBarrel = game.barrels.entrySet() //
+				.stream() //
+				.min((e1, e2) -> Integer.compare(e1.getValue().distance, e2.getValue().distance)) //
+				.get().getValue();
+		nextBarrel = nearestBarrel;
+		return nextBarrel;
+	}
+
+	private int distanceBetween(Entity a, Entity b) {
+		double distance = Math.sqrt(Math.pow((a.x - b.x), 2) + Math.pow((a.y - b.y), 2));
+		return (int) distance;
+	}
+
+	public boolean isSameCoord(Entity y, Entity i) {
 		return (i.x == y.x) && (i.y == y.y);
 	}
+}
 
-	static void play(String action) {
-		System.out.println(action);
-	}
-
-	// FUNCTIONS UTILS
-
-	static void debug(String str) {
+class Engine {
+	public static void debug(String str) {
 		System.err.println(str);
 	}
+}
 
-	static class Preconditions {
-		static void check(boolean condition) {
-			if (!condition)
-				throw new RuntimeException("CONDITION FALSE");
-		}
+class Game {
+	int turn = 0;
+	Map<Integer, Entity> entities = null;
+	int myShipCount;
+	int entityCount;
+
+	Map<Integer, Entity> myShips;
+	Map<Integer, Entity> barrels;
+
+	public void update(Scanner in) {
+		updateCount(in);
+		updateEntities(in);
+		updateModel();
+		turn++;
+		debug();
 	}
 
-	static void debug(GameState gameState, List<Entity> entities) {
-		debug("gameState.turn=" + gameState.turn);
-		debug("gameState.nextBarrel=" + gameState.nextBarrel);
-		for (Entity entity : entities) {
-			debug("entity=" + entity.toString());
-		}
+	private void updateCount(Scanner in) {
+		myShipCount = in.nextInt();
+		entityCount = in.nextInt();
 	}
 
-	private static List<Entity> init(Scanner in, int entityCount) {
-		List<Entity> entities = new ArrayList<Entity>();
+	private void updateEntities(Scanner in) {
+		Map<Integer, Entity> entities = new HashMap<Integer, Entity>();
 		for (int i = 0; i < entityCount; i++) {
-			UnknownEntity entity = new UnknownEntity();
-			entity.id = in.nextInt();
-			entity.type = in.next();
-			entity.x = in.nextInt();
-			entity.y = in.nextInt();
-			entity.arg1 = in.nextInt();
-			entity.arg2 = in.nextInt();
-			entity.arg3 = in.nextInt();
-			entity.arg4 = in.nextInt();
-
-			switch (entity.type) {
-			case "SHIP":
-				Ship ship = new Ship();
-				ship.id = entity.id;
-				ship.x = entity.x;
-				ship.y = entity.y;
-				ship.orientation = entity.arg1;
-				ship.speed = entity.arg2;
-				ship.rum = entity.arg3;
-				ship.team = entity.arg4;
-				entities.add(ship);
-				break;
-			case "BARREL":
-				Barrel barrel = new Barrel();
-				barrel.id = entity.id;
-				barrel.x = entity.x;
-				barrel.y = entity.y;
-				barrel.rum = entity.arg1;
-				entities.add(barrel);
-				break;
-			default:
-				// ERROR
-				break;
-			}
+			Entity entity = nextEntity(in);
+			entities.put(entity.id, entity);
 		}
-		return entities;
+		this.entities = entities;
 	}
 
-	// CLASSES
+	public Entity nextEntity(Scanner in) {
+		Entity entity = new Entity();
+		entity.id = in.nextInt();
+		entity.type = EntityType.valueOf(in.next());
+		entity.x = in.nextInt();
+		entity.y = in.nextInt();
+		entity.arg1 = in.nextInt();
+		entity.arg2 = in.nextInt();
+		entity.arg3 = in.nextInt();
+		entity.arg4 = in.nextInt();
+		return entity;
+	}
 
-	static class Entity {
-		int id;
-		int x;
-		int y;
+	private void updateModel() {
+		myShips = Data.findByTypeTeam(entities, EntityType.SHIP, 1);
+		barrels = Data.findByType(entities, EntityType.BARREL);
+		Preconditions.check(myShips.size() == myShipCount);
+	}
 
-		@Override
-		public String toString() {
-			return "Entity [id=" + id + ", x=" + x + ", y=" + y + " ]";
+	public void debug() {
+		Engine.debug("gameState.turn=" + turn);
+		for (Entry<Integer, Entity> entity : entities.entrySet()) {
+			Engine.debug("entity=" + entity.getValue().toString());
 		}
 	}
 
-	static class UnknownEntity extends Entity {
-		String type;
-		int arg1;
-		int arg2;
-		int arg3;
-		int arg4;
+}
+
+// UTILS
+
+class Data {
+
+	public static Map<Integer, Entity> findByType(Map<Integer, Entity> entities, EntityType type) {
+		return entities.entrySet() //
+				.stream() //
+				.filter(e -> (type == e.getValue().type)) //
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 	}
 
-	static class Ship extends Entity {
-		int orientation; // [0..5]
-		int speed; // [0..2]
-		int rum; // [0..X]
-		int team;
+	public static Map<Integer, Entity> findByTypeTeam(Map<Integer, Entity> entities, EntityType type, int team) {
+		return entities.entrySet() //
+				.stream() //
+				.filter(e -> (type == e.getValue().type)) //
+				.filter(e -> (team == e.getValue().arg4)) //
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+	}
+}
 
-		@Override
-		public String toString() {
-			return "Ship [id=" + id + ", x=" + x + ", y=" + y + ", team=" + team + " ]";
-		}
+// MODEL
+
+class Entity {
+	int id;
+	int x;
+	int y;
+
+	EntityType type;
+	int arg1;
+	int arg2;
+	int arg3;
+	int arg4;
+
+	@Override
+	public String toString() {
+		return type + " [id=" + id + ", x=" + x + ", y=" + y + " ]";
 	}
 
-	static class Barrel extends Entity {
-		int rum; // [0..X]
+	int distance;
+}
 
-		@Override
-		public String toString() {
-			return "Barrel [id=" + id + ", x=" + x + ", y=" + y + " ]";
-		}
-	}
+enum EntityType {
+	SHIP, BARREL, MINE, CANNONBALL;
+}
 
-	static class GameState {
-		int turn = 0;
-		Barrel nextBarrel;
+enum ActionType {
+	MOVE, FIRE, MINE, SLOWER, WAIT
+}
+
+// UTILS
+
+class Preconditions {
+	static void check(boolean condition) {
+		if (!condition)
+			throw new RuntimeException("CONDITION FALSE");
 	}
 }
