@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.damienfremont.codingame</groupId>
-	<artifactId>codingame-2017-contests-coders-of-the-caribbean</artifactId>
+	<artifactId>codingame-contests-coders_of_the_caribbean</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
@@ -12,14 +12,13 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
-					<source />
-					<target />
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>

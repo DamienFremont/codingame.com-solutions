@@ -1,4 +1,4 @@
-# codingame-2017-contests-coders-of-the-caribbean
+# codingame-contests-coders_of_the_caribbean
 5,047 CodinGamers have registered to this contest
 
 https://www.codingame.com/contests/coders-of-the-caribbean
