@@ -4,28 +4,23 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-// MAIN
-
 class Player {
 
 	public static void main(String args[]) {
-		IA bot = new IA();
+		Bot bot = new Bot();
 		Game game = new Game();
+		Timer timer = new Timer();
 		Scanner in = new Scanner(System.in);
 		while (true) {
-			long startTime = System.currentTimeMillis();
+			timer.begin();
 			game.update(in);
 			bot.play(game);
-			long stopTime = System.currentTimeMillis();
-			long elapsedTime = stopTime - startTime;
-			Engine.debug(String.format("elapsedTime= %d ms", elapsedTime));
+			timer.end();
 		}
 	}
 }
 
-// BOT
-
-class IA {
+class Bot {
 
 	public void play(Game game) {
 		for (Entry<Integer, Entity> e : game.myShips.entrySet()) {
@@ -85,12 +80,6 @@ class IA {
 
 	public boolean isSameCoord(Entity y, Entity i) {
 		return (i.x == y.x) && (i.y == y.y);
-	}
-}
-
-class Engine {
-	public static void debug(String str) {
-		System.err.println(str);
 	}
 }
 
@@ -206,9 +195,34 @@ enum ActionType {
 
 // UTILS
 
+class Engine {
+	
+	public static void debug(String str) {
+		System.err.println(str);
+	}
+}
+
 class Preconditions {
+	
 	static void check(boolean condition) {
 		if (!condition)
 			throw new RuntimeException("CONDITION FALSE");
+	}
+}
+
+class Timer {
+	
+	long startTime;
+	long stopTime;
+	long elapsedTime;
+	
+	public void begin() {
+		startTime = System.currentTimeMillis();
+	}
+
+	public void end() {
+		stopTime = System.currentTimeMillis();
+		elapsedTime = stopTime - startTime;
+		Engine.debug(String.format("elapsedTime= %d ms", elapsedTime));
 	}
 }
