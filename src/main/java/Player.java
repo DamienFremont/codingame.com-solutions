@@ -1,91 +1,52 @@
-import java.util.*;
-import java.io.*;
-import java.math.*;
+import java.util.Scanner;
 
 class Player {
 
 	public static void main(String args[]) {
-
-		// OBJECTS
-		Point playerPod = new Point();
-		Point opponentPod = new Point();
-		Point nextCheckpoint = new Point();
-		GameState gameState = new GameState();
-
+		Bot bot = new Bot();
+		Game game = new Game();
+		Timer timer = new Timer();
 		Scanner in = new Scanner(System.in);
-
-		// game loop
 		while (true) {
-			playerPod.x = in.nextInt();
-			playerPod.y = in.nextInt();
-			nextCheckpoint.x = in.nextInt();
-			nextCheckpoint.y = in.nextInt();
-			gameState.nextCheckpointDistance = in.nextInt();
-			gameState.nextCheckpointAngle = in.nextInt();
-			opponentPod.x = in.nextInt();
-			opponentPod.y = in.nextInt();
+			timer.begin();
+			game.update(in);
+			bot.play(game);
+			timer.end();
+		}
+	}
+}
 
-			gameState.turn++;
+class Bot {
 
-			Move nextMove = compute(nextCheckpoint, gameState);
+	Move nextMove;
 
-			debug(gameState, nextMove);
-			play(nextMove);
+	void play(Game game) {
+		nextMove = compute(game.nextCheckpoint, game);
+		if (nextMove.useBoost) {
+			game.isBoostUsed = true;
+			System.out.println(nextMove.x + " " + nextMove.y + " BOOST");
+		} else {
+			Preconditions.check(0 <= nextMove.thrust);
+			Preconditions.check(nextMove.thrust <= 100);
+			System.out.println(nextMove.x + " " + nextMove.y + " " + nextMove.thrust);
 		}
 	}
 
-	// FUNCTIONS UTILS
-
-	static void debug(String str) {
-		System.err.println(str);
-	}
-
-	static class Preconditions {
-		static void check(boolean condition) {
-			if (!condition)
-				throw new RuntimeException("CONDITION FALSE");
-		}
-	}
-
-	static void debug(GameState gameState, Move nextMove) {
-		debug("gameState.turn=" + gameState.turn);
-		debug("gameState.isBoostUsed=" + gameState.isBoostUsed);
-
-		debug("gameState.nextCheckpointDistance=" + gameState.nextCheckpointDistance);
-		debug("gameState.nextCheckpointAngle=" + gameState.nextCheckpointAngle);
-
-		debug("nextMove.x=" + nextMove.x);
-		debug("nextMove.y=" + nextMove.x);
-		debug("nextMove.thrust=" + nextMove.thrust);
-		debug("nextMove.useBoost=" + nextMove.useBoost);
-	}
-	// FUNCTIONS BOT
-
-	static void play(Move move) {
-		if (move.useBoost)
-			System.out.println(move.x + " " + move.y + " BOOST");
-		else {
-			Preconditions.check(0 <= move.thrust);
-			Preconditions.check(move.thrust <= 100);
-			System.out.println(move.x + " " + move.y + " " + move.thrust);
-		}
-	}
-
-	static Move compute(Point nextCheckpoint, GameState gameState) {
+	Move compute(Point nextCheckpoint, Game game) {
 		Move nextMove = new Move();
 		nextMove.x = nextCheckpoint.x;
 		nextMove.y = nextCheckpoint.y;
-		nextMove.thrust = compute_thrust(gameState);
-		nextMove.useBoost = isOkToBoost(gameState);
+		nextMove.thrust = compute_thrust(game);
+		nextMove.useBoost = isOkToBoost(game);
 		return nextMove;
 	}
 
-	static int compute_thrust(GameState gameState) {
+	int compute_thrust(Game game) {
 		int thrust = 0;
-		boolean isReversedRight = gameState.nextCheckpointAngle > 90;
-		boolean isReversedLeft = gameState.nextCheckpointAngle < -90;
+		boolean isReversedRight = game.nextCheckpointAngle > 90;
+		boolean isReversedLeft = game.nextCheckpointAngle < -90;
 		boolean isReversed = isReversedRight || isReversedLeft;
-		boolean isAproachingTooFast = gameState.nextCheckpointDistance < 1000;
+		boolean isAproachingTooFast = game.nextCheckpointDistance < 1000;
 		if (isReversed) {
 			thrust = 0;
 		} else if (isAproachingTooFast) {
@@ -96,36 +57,96 @@ class Player {
 		return thrust;
 	}
 
-	static boolean isOkToBoost(GameState gameState) {
-		if (gameState.isBoostUsed)
+	boolean isOkToBoost(Game game) {
+		if (game.isBoostUsed)
 			return false;
-		boolean isFacingIt = (gameState.nextCheckpointAngle == 0);
-		boolean isDistanceEnough = (gameState.nextCheckpointDistance > 7000);
+		boolean isFacingIt = (game.nextCheckpointAngle == 0);
+		boolean isDistanceEnough = (game.nextCheckpointDistance > 7000);
 		boolean isOkToBoost = isFacingIt && isDistanceEnough;
-		if (gameState.isBoostUsed)
-			gameState.isBoostUsed = true;
 		return isOkToBoost;
 	}
 
-	// CLASSES
+	void debug() {
+		Engine.debug("nextMove.x=" + nextMove.x);
+		Engine.debug("nextMove.y=" + nextMove.x);
+		Engine.debug("nextMove.thrust=" + nextMove.thrust);
+		Engine.debug("nextMove.useBoost=" + nextMove.useBoost);
+	}
+}
 
-	static class Point {
-		int x;
-		int y;
+class Game {
+	int turn = 0;
+	boolean isBoostUsed = false;
+	Point playerPod = new Point();
+	Point opponentPod = new Point();
+	Point nextCheckpoint = new Point();
+	int nextCheckpointDistance;
+	int nextCheckpointAngle;
+
+	void debug() {
+		Engine.debug("turn=" + turn);
+		Engine.debug("isBoostUsed=" + isBoostUsed);
+		Engine.debug("nextCheckpointDistance=" + nextCheckpointDistance);
+		Engine.debug("nextCheckpointAngle=" + nextCheckpointAngle);
 	}
 
-	static class Move {
-		int x;
-		int y;
-		int thrust;
-		boolean useBoost;
+	void update(Scanner in) {
+		playerPod.x = in.nextInt();
+		playerPod.y = in.nextInt();
+		nextCheckpoint.x = in.nextInt();
+		nextCheckpoint.y = in.nextInt();
+		nextCheckpointDistance = in.nextInt();
+		nextCheckpointAngle = in.nextInt();
+		opponentPod.x = in.nextInt();
+		opponentPod.y = in.nextInt();
+		turn++;
+		debug();
+	}
+}
+// MODEL
+
+class Point {
+	int x;
+	int y;
+}
+
+class Move {
+	int x;
+	int y;
+	int thrust;
+	boolean useBoost;
+}
+
+// UTILS
+
+class Engine {
+
+	public static void debug(String str) {
+		System.err.println(str);
+	}
+}
+
+class Preconditions {
+
+	static void check(boolean condition) {
+		if (!condition)
+			throw new RuntimeException("CONDITION FALSE");
+	}
+}
+
+class Timer {
+
+	long startTime;
+	long stopTime;
+	long elapsedTime;
+
+	public void begin() {
+		startTime = System.currentTimeMillis();
 	}
 
-	static class GameState {
-		int turn = 0;
-		boolean isBoostUsed = false;
-
-		int nextCheckpointDistance;
-		int nextCheckpointAngle;
+	public void end() {
+		stopTime = System.currentTimeMillis();
+		elapsedTime = stopTime - startTime;
+		Engine.debug(String.format("elapsedTime= %d ms", elapsedTime));
 	}
 }
