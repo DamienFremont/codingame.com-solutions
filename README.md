@@ -1,4 +1,4 @@
-# codingame-2017-practice-bot-programming-coders-strike-back
+# codingame-multiplayer-bot_programming-coders_strike_back
 OptimizationMulti-AgentNeural NetworkDistancesTrigonometry
 
 https://www.codingame.com/multiplayer/bot-programming/coders-strike-back
