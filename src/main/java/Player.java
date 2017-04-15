@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 class Player {
@@ -17,11 +19,12 @@ class Player {
 }
 
 class Bot {
-
+	List<Point> knownCheckPoints = new ArrayList<>();
 	Move nextMove;
 
 	void play(Game game) {
-		nextMove = compute(game.nextCheckpoint, game);
+		updateKnown(game);
+		nextMove = compute(game);
 		if (nextMove.useBoost) {
 			game.isBoostUsed = true;
 			System.out.println(nextMove.x + " " + nextMove.y + " BOOST");
@@ -32,10 +35,23 @@ class Bot {
 		}
 	}
 
-	Move compute(Point nextCheckpoint, Game game) {
+	protected void updateKnown(Game game) {
+		if (!containsPoint(knownCheckPoints, game.nextCheckpoint)) {
+			knownCheckPoints.add(game.nextCheckpoint);
+		}
+		for (Point i : knownCheckPoints) {
+			Engine.debug(String.format("knownCheckPoints: x=%d, y=%d", i.x, i.y));
+		}
+	}
+
+	boolean containsPoint(final List<Point> list, final Point item) {
+		return list.stream().filter(o -> (o.x == item.x)).findFirst().isPresent();
+	}
+
+	Move compute(Game game) {
 		Move nextMove = new Move();
-		nextMove.x = nextCheckpoint.x;
-		nextMove.y = nextCheckpoint.y;
+		nextMove.x = game.nextCheckpoint.x;
+		nextMove.y = game.nextCheckpoint.y;
 		nextMove.thrust = compute_thrust(game);
 		nextMove.useBoost = isOkToBoost(game);
 		return nextMove;
@@ -75,32 +91,39 @@ class Bot {
 }
 
 class Game {
+
 	int turn = 0;
 	boolean isBoostUsed = false;
 	Point playerPod = new Point();
 	Point opponentPod = new Point();
-	Point nextCheckpoint = new Point();
+	Point nextCheckpoint;
 	int nextCheckpointDistance;
 	int nextCheckpointAngle;
 
-	void debug() {
-		Engine.debug("turn=" + turn);
-		Engine.debug("isBoostUsed=" + isBoostUsed);
-		Engine.debug("nextCheckpointDistance=" + nextCheckpointDistance);
-		Engine.debug("nextCheckpointAngle=" + nextCheckpointAngle);
+	void update(Scanner in) {
+		updateModel(in);
+		turn++;
+		debug();
 	}
 
-	void update(Scanner in) {
+	private void updateModel(Scanner in) {
 		playerPod.x = in.nextInt();
 		playerPod.y = in.nextInt();
+		nextCheckpoint = new Point();
 		nextCheckpoint.x = in.nextInt();
 		nextCheckpoint.y = in.nextInt();
 		nextCheckpointDistance = in.nextInt();
 		nextCheckpointAngle = in.nextInt();
 		opponentPod.x = in.nextInt();
 		opponentPod.y = in.nextInt();
-		turn++;
-		debug();
+	}
+	
+	void debug() {
+		Engine.debug("turn=" + turn);
+		Engine.debug("isBoostUsed=" + isBoostUsed);
+		Engine.debug(String.format("nextCheckpoint x=%d, y=%d", nextCheckpoint.x, nextCheckpoint.y));
+		Engine.debug("nextCheckpointDistance=" + nextCheckpointDistance);
+		Engine.debug("nextCheckpointAngle=" + nextCheckpointAngle);
 	}
 }
 // MODEL
@@ -108,6 +131,14 @@ class Game {
 class Point {
 	int x;
 	int y;
+
+	@Override
+	public boolean equals(Object obj) {
+		Point other = (Point) obj;
+		if ((x == other.x) && (y == other.y))
+			return true;
+		return false;
+	}
 }
 
 class Move {
