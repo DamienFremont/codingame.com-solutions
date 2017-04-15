@@ -1,8 +1,8 @@
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.stream.Collectors;
-import java.io.*;
-import java.math.*;
 
 // MAIN
 
@@ -32,9 +32,12 @@ class IA {
 			Entity ship = e.getValue();
 			ActionType nextAction = compute_nextAction(game, ship);
 			String action;
-			if(nextAction == ActionType.MOVE) {
+			if (nextAction == ActionType.MOVE) {
 				Entity nextBarrel = compute_nextBarrel(game, ship);
 				action = String.format("%s %d %d", nextAction, nextBarrel.x, nextBarrel.y);
+			} else if (nextAction == ActionType.FIRE) {
+				Entity nextTarget = compute_nextTarget(game, ship);
+				action = String.format("%s %d %d", nextAction, nextTarget.x, nextTarget.y);
 			} else {
 				action = String.format("%s", nextAction);
 			}
@@ -43,8 +46,19 @@ class IA {
 		}
 	}
 
+	public Entity compute_nextTarget(Game game, Entity ship) {
+		return game.hisShips.entrySet().iterator().next().getValue();
+	}
+
 	public ActionType compute_nextAction(Game game, Entity ship) {
-		return game.barrels.isEmpty() ? ActionType.WAIT : ActionType.MOVE;
+		ActionType nextAction;
+		boolean isPairTurn = ((game.turn % 2) == 0);
+		if (isPairTurn) {
+			nextAction = game.barrels.isEmpty() ? ActionType.WAIT : ActionType.MOVE;
+		} else {
+			nextAction = ActionType.FIRE;
+		}
+		return nextAction;
 	}
 
 	public Entity compute_nextBarrel(Game game, Entity ship) {
@@ -58,6 +72,9 @@ class IA {
 				.min((e1, e2) -> Integer.compare(e1.getValue().distance, e2.getValue().distance)) //
 				.get().getValue();
 		nextBarrel = nearestBarrel;
+		// TODO more than one : equal distance
+		// TODO sitting duck if orientation >< 90
+		// TODO eviter mines
 		return nextBarrel;
 	}
 
@@ -84,6 +101,7 @@ class Game {
 	int entityCount;
 
 	Map<Integer, Entity> myShips;
+	Map<Integer, Entity> hisShips;
 	Map<Integer, Entity> barrels;
 
 	public void update(Scanner in) {
@@ -123,6 +141,7 @@ class Game {
 
 	private void updateModel() {
 		myShips = Data.findByTypeTeam(entities, EntityType.SHIP, 1);
+		hisShips = Data.findByTypeTeam(entities, EntityType.SHIP, 0);
 		barrels = Data.findByType(entities, EntityType.BARREL);
 		Preconditions.check(myShips.size() == myShipCount);
 	}
