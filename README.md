@@ -1,5 +1,5 @@
 # codingame-multiplayer-bot_programming-coders_strike_back
-OptimizationMulti-AgentNeural NetworkDistancesTrigonometry
+22,929 CodinGamers in the Coders Strike Back arena
 
 https://www.codingame.com/multiplayer/bot-programming/coders-strike-back
 
