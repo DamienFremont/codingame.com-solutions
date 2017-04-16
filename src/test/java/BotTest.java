@@ -14,7 +14,9 @@ public class BotTest {
 	@Test
 	public void updateKnown() {
 
-		String data = "1 2 300 400 5 6 7 8";
+		String data = "" + //
+				"1 2 300 400 5 6 7 8 " + //
+				"1 2 301 401 5 6 7 8";
 		InputStream stdin = System.in;
 		try {
 			System.setIn(new ByteArrayInputStream(data.getBytes()));
@@ -22,11 +24,13 @@ public class BotTest {
 
 			game.update(in);
 			bot.updateKnown(game);
+			game.update(in);
+			bot.updateKnown(game);
 
 		} finally {
 			System.setIn(stdin);
 		}
-		assertThat(bot.knownCheckPoints).isNotEmpty().hasSize(1);
+		assertThat(bot.knownCheckPoints).isNotEmpty().hasSize(2);
 	}
 
 	@Test
