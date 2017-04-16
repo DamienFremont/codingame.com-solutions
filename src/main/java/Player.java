@@ -42,6 +42,7 @@ class Bot {
 		for (Point i : knownCheckPoints) {
 			Engine.debug(String.format("knownCheckPoints: x=%d, y=%d", i.x, i.y));
 		}
+		// TODO is end turn?
 	}
 
 	boolean containsPoint(final List<Point> list, final Point item) {
@@ -50,6 +51,7 @@ class Bot {
 
 	Move compute(Game game) {
 		Move nextMove = new Move();
+		// TODO tourner à l'avance
 		nextMove.x = game.nextCheckpoint.x;
 		nextMove.y = game.nextCheckpoint.y;
 		nextMove.thrust = compute_thrust(game);
@@ -117,8 +119,10 @@ class Game {
 		opponentPod.x = in.nextInt();
 		opponentPod.y = in.nextInt();
 	}
-	
+
 	void debug() {
+		Engine.debug(String.format("%d %d %d %d %d %d", //
+				playerPod.x, playerPod.y, nextCheckpoint.x, nextCheckpoint.y, opponentPod.x, opponentPod.y));
 		Engine.debug("turn=" + turn);
 		Engine.debug("isBoostUsed=" + isBoostUsed);
 		Engine.debug(String.format("nextCheckpoint x=%d, y=%d", nextCheckpoint.x, nextCheckpoint.y));
