@@ -19,7 +19,7 @@ enum OutputAction {
 
 class Bot {
 	static String nextAction() {
-		return OutputAction.WAIT + "";
+		return OutputAction.MOVE + " "+1+" "+4+" "+12;
 	}
 }
 
