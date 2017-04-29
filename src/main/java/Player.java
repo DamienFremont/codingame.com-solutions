@@ -29,42 +29,47 @@ class Bot {
 		int fromFactory = Data.find_my_next_factory();
 		int toFactory = Data.find_nearest_empty_factory();
 		int cyborgsSended = 12;
-		return OutputAction.MOVE + " " + fromFactory + " " + toFactory + " " + cyborgsSended;
+		if (fromFactory != -1 && toFactory != -1)
+			return OutputAction.MOVE + " " + fromFactory + " " + toFactory + " " + cyborgsSended;
+		else
+			return OutputAction.WAIT + "";
 	}
 
 }
 
 class Data {
 	static int find_nearest_empty_factory() {
-		for (Entity entity : GameInput.turn.entities) {
-			if (isFactory(entity) && isEmpty(entity)) {
-				return entity.entityId;
+		for (Entity i : GameInput.turn.entities) {
+			if (isFactory(i) && isEmpty(i)) {
+				return i.entityId;
 			}
 		}
 		// for (Link i : GameInput.init.links) {
 		// boolean isFirst = (res == null);
 		// boolean isNear = (res.distance < i.distance);
 		// boolean isEmpty = isEmpty(i.);
-		Log.debug("find_nearest_empty_factoryNOT FOUND");
-		throw new RuntimeException();
+		return -1;
 	}
 
 	static int find_my_next_factory() {
-		for (Entity entity : GameInput.turn.entities) {
-			if (isFactory(entity) && isMe(entity)) {
-				return entity.entityId;
+		for (Entity i : GameInput.turn.entities) {
+			if (isFactory(i) && isMe(i) && hasCyborgsCountMin(i, 4)) {
+				return i.entityId;
 			}
 		}
-		Log.debug("find_my_next_factory NOT FOUND");
-		throw new RuntimeException();
+		return -1;
 	}
 
-	static boolean isMe(Entity entity) {
-		return entity.arg1 == 1;
+	static boolean hasCyborgsCountMin(Entity e, int min) {
+		return e.arg2 >= min;
 	}
 
-	static boolean isEmpty(Entity entity) {
-		return entity.arg1 == 0;
+	static boolean isMe(Entity e) {
+		return e.arg1 == 1;
+	}
+
+	static boolean isEmpty(Entity e) {
+		return e.arg1 == 0;
 	}
 
 	static boolean isFactory(Entity i) {
