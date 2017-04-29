@@ -26,8 +26,8 @@ class Bot {
 	}
 
 	static String move_to_empty_factory() {
-		int fromFactory = 1;
-		int toFactory = Data.findNearestEmptyFactory();
+		int fromFactory = Data.find_my_next_factory();
+		int toFactory = Data.find_nearest_empty_factory();
 		int cyborgsSended = 12;
 		return OutputAction.MOVE + " " + fromFactory + " " + toFactory + " " + cyborgsSended;
 	}
@@ -35,26 +35,39 @@ class Bot {
 }
 
 class Data {
-	static int findNearestEmptyFactory() {
-		int res = 0;
+	static int find_nearest_empty_factory() {
 		for (Entity entity : GameInput.turn.entities) {
 			if (isFactory(entity) && isEmpty(entity)) {
-				res = entity.entityId;
+				return entity.entityId;
 			}
 		}
-
 		// for (Link i : GameInput.init.links) {
 		// boolean isFirst = (res == null);
 		// boolean isNear = (res.distance < i.distance);
 		// boolean isEmpty = isEmpty(i.);
-		return res;
+		Log.debug("find_nearest_empty_factoryNOT FOUND");
+		throw new RuntimeException();
 	}
 
-	private static boolean isEmpty(Entity i) {
-		return i.arg1 == 0;
+	static int find_my_next_factory() {
+		for (Entity entity : GameInput.turn.entities) {
+			if (isFactory(entity) && isMe(entity)) {
+				return entity.entityId;
+			}
+		}
+		Log.debug("find_my_next_factory NOT FOUND");
+		throw new RuntimeException();
 	}
 
-	private static boolean isFactory(Entity i) {
+	static boolean isMe(Entity entity) {
+		return entity.arg1 == 1;
+	}
+
+	static boolean isEmpty(Entity entity) {
+		return entity.arg1 == 0;
+	}
+
+	static boolean isFactory(Entity i) {
 		return i.entityType == EntityType.FACTORY;
 	}
 }
