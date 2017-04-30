@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 class Player {
 
@@ -10,7 +11,7 @@ class Player {
 		// game loop
 		while (true) {
 			GameInput.turnInput(in);
-			String nextAction = Bot.nextAction();
+			String nextAction = Bot.next_action();
 			GameInput.turnOutput(nextAction);
 		}
 	}
@@ -21,50 +22,71 @@ enum OutputAction {
 }
 
 class Bot {
-	static String nextAction() {
-		return move_to_empty_factory();
-	}
 
-	static String move_to_empty_factory() {
-		int fromFactory = Data.find_my_next_factory();
-		int toFactory = Data.find_nearest_empty_factory();
-		int cyborgsSended = 12;
-		if (fromFactory != -1 && toFactory != -1)
-			return OutputAction.MOVE + " " + fromFactory + " " + toFactory + " " + cyborgsSended;
+	static String next_action() {
+		int from = find_my_next_factory();
+		int to = find_nearest_empty_factory(from);
+		int send = how_many_to_send(from);
+		if (from != -1 && to != -1)
+			return OutputAction.MOVE + " " + from + " " + to + " " + send;
 		else
 			return OutputAction.WAIT + "";
 	}
 
+	static int find_my_next_factory() {
+		for (Entity i : GameInput.turn.entities) {
+			if (Data.is_factory(i) && Data.is_me(i) && Data.has_cyborgs_count_min(i, 4)) {
+				return i.entityId;
+			}
+		}
+		return -1;
+	}
+	static int find_nearest_empty_factory(int from) {
+		List<Entity> toFactories = GameInput.turn.entities //
+				.stream() //
+				.filter(i -> (Data.is_factory(i) && Data.isEmpty(i))) //
+				.collect(Collectors.toList());
+		Entity nearestFactory = toFactories //
+				.stream() //
+				.min((p1, p2) -> Integer.compare(//
+						Data.distance_between(from, p1.entityId), //
+						Data.distance_between(from, p2.entityId)))
+				.get();
+		return nearestFactory.entityId;
+	}
+	static int how_many_to_send(int from) {
+		int cyborgCount = Data.get_factory(from).arg2;
+		return cyborgCount;
+	}
 }
 
 class Data {
-	static int find_nearest_empty_factory() {
-		for (Entity i : GameInput.turn.entities) {
-			if (isFactory(i) && isEmpty(i)) {
-				return i.entityId;
-			}
-		}
-		// for (Link i : GameInput.init.links) {
-		// boolean isFirst = (res == null);
-		// boolean isNear = (res.distance < i.distance);
-		// boolean isEmpty = isEmpty(i.);
-		return -1;
+
+
+
+	static Entity get_factory(int entityId) {
+		return GameInput.turn.entities //
+				.stream() //
+				.filter(i -> entityId == i.entityId) //
+				.findFirst() //
+				.get();
 	}
 
-	static int find_my_next_factory() {
-		for (Entity i : GameInput.turn.entities) {
-			if (isFactory(i) && isMe(i) && hasCyborgsCountMin(i, 4)) {
-				return i.entityId;
-			}
-		}
-		return -1;
+	static int distance_between(int from, int to) {
+		Link link = GameInput.init.links //
+				.stream() //
+				.filter(i -> (i.factory1 == from && i.factory2 == to) //
+						|| (i.factory2 == from && i.factory1 == to)) //
+				.findFirst() //
+				.get();
+		return link.distance;
 	}
 
-	static boolean hasCyborgsCountMin(Entity e, int min) {
+	static boolean has_cyborgs_count_min(Entity e, int min) {
 		return e.arg2 >= min;
 	}
 
-	static boolean isMe(Entity e) {
+	static boolean is_me(Entity e) {
 		return e.arg1 == 1;
 	}
 
@@ -72,7 +94,7 @@ class Data {
 		return e.arg1 == 0;
 	}
 
-	static boolean isFactory(Entity i) {
+	static boolean is_factory(Entity i) {
 		return i.entityType == EntityType.FACTORY;
 	}
 }
@@ -126,9 +148,12 @@ class GameInput {
 		}
 		Preconditions.check(init.linkCount == init.links.size());
 
-		Log.debug("factoryCount=%d", init.factoryCount);
-		Log.debug("linkCount=%d", init.linkCount);
+		Log.debug("factoryCount");
+		Log.debug("linkCount");
 		Log.debug("id, id, dist");
+		
+		Log.debug("%d", init.factoryCount);
+		Log.debug("%d", init.linkCount);
 		for (Link i : init.links) {
 			Log.debug("%d %d %d", i.factory1, i.factory2, i.distance);
 		}
@@ -152,6 +177,8 @@ class GameInput {
 
 		Log.debug("entityCount=%d", turn.entityCount);
 		Log.debug("id, type, arg1, arg2, arg3");
+		
+		Log.debug("%d", turn.entityCount);
 		for (Entity i : turn.entities) {
 			Log.debug("%d %s %d %d %d %d %d", i.entityId, i.entityType, i.arg1, i.arg2, i.arg3, i.arg4, i.arg5);
 		}
