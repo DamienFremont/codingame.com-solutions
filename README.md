@@ -1,5 +1,5 @@
 # codingame
-My code to compete in coding game
+My code to compete at CodingGame.
 
 https://www.codingame.com/
 
