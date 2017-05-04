@@ -8,6 +8,7 @@ https://www.codingame.com/
 ## Training
 
 - [onboarding](training-easy-onboarding)
+- [onboarding](training-easy-the_descent)
 
 ## Multiplayer
 
