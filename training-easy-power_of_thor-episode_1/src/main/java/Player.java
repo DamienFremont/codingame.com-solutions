@@ -29,14 +29,25 @@ class Model {
 	}
 
 	static enum OutputAction {
-		N(0, -1), NE(1, -1), E(1, 0), SE(1, 1), S(0, 1), SW(-1, 1), W(-1, 0), NW(-1, -1);
+		N(0, -1, 337, 22), //
+		NE(1, -1, 22, 67), //
+		E(1, 0, 67, 112), //
+		SE(1, 1, 112, 157), //
+		S(0, 1, 157, 202), //
+		SW(-1, 1, 202, 247), //
+		W(-1, 0, 247, 292), //
+		NW(-1, -1, 292, 337);
 
 		int xMove;
 		int yMove;
+		int angleMin;
+		int angleMax;
 
-		OutputAction(int xMove, int yMove) {
+		OutputAction(int xMove, int yMove, int angleMin, int angleMax) {
 			this.xMove = xMove;
 			this.yMove = yMove;
+			this.angleMin = angleMin;
+			this.angleMax = angleMax;
 		}
 	}
 
@@ -62,20 +73,13 @@ class Bot {
 	}
 
 	Model.OutputAction get_action_from_angle(double angle) {
-		Model.OutputAction result;
-
-		if ((315 >= angle && angle < 0) || (0 <= angle && angle < 45))
-			result = Model.OutputAction.N;
-		else if ((45 <= angle) && (angle < 135))
-			result = Model.OutputAction.E;
-		else if ((135 <= angle) && (angle < 225))
-			result = Model.OutputAction.S;
-		else if ((225 <= angle) && (angle < 315))
-			result = Model.OutputAction.W;
-		else
-			throw new RuntimeException();
-
-		return result;
+		for (Model.OutputAction action : Model.OutputAction.values()) {
+			if ((action.angleMin >= angle && angle < 0) || (0 <= angle && angle < action.angleMax))
+				return action;
+			else if ((action.angleMin <= angle) && (angle < action.angleMax))
+				return action;
+		}
+		throw new RuntimeException();
 	}
 
 	int angle_between(Model.Point p1, Model.Point p2) {
