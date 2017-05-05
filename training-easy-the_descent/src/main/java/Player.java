@@ -1,29 +1,62 @@
-import java.util.*;
-import java.io.*;
-import java.math.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
-/**
- * The while loop represents the game.
- * Each iteration represents a turn of the game
- * where you are given inputs (the heights of the mountains)
- * and where you have to print an output (the index of the mountain to fire on)
- * The inputs you are given are automatically updated according to your last actions.
- **/
 class Player {
 
-    public static void main(String args[]) {
-        Scanner in = new Scanner(System.in);
+	public static void main(String args[]) {
+		Scanner in = new Scanner(System.in);
+		Game game = new Game();
+		Bot bot = new Bot();
+		while (true) {
+			game.scanInput(in);
+			String output = bot.next_action(game);
+			game.play(output);
+		}
+	}
+}
 
-        // game loop
-        while (true) {
-            for (int i = 0; i < 8; i++) {
-                int mountainH = in.nextInt(); // represents the height of one mountain.
-            }
+class Model {
+	static class Mountain {
+		int id;
+		int height;
+	}
+}
 
-            // Write an action using System.out.println()
-            // To debug: System.err.println("Debug messages...");
+class Bot {
+	Data data = new Data();
 
-            System.out.println("4"); // The index of the mountain to fire on.
-        }
-    }
+	String next_action(Game game) {
+		Model.Mountain heighestMountain = data.find_mountain_by_max_height(game.input);
+		int output = heighestMountain.id;
+		return output + "";
+	}
+}
+
+class Data {
+	Model.Mountain find_mountain_by_max_height(List<Model.Mountain> input) {
+		return input //
+				.stream() //
+				.max((p1, p2) -> Integer.compare(p1.height, p2.height)) //
+				.get();
+	}
+}
+
+class Game {
+	List<Model.Mountain> input;
+
+	void scanInput(Scanner in) {
+		input = new ArrayList<>();
+		for (int i = 0; i < 8; i++) {
+			int mountainHeight = in.nextInt();
+			Model.Mountain newMountain = new Model.Mountain();
+			newMountain.id = i;
+			newMountain.height = mountainHeight;
+			input.add(newMountain);
+		}
+	}
+
+	void play(String output) {
+		System.out.println(output);
+	}
 }
