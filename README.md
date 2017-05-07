@@ -8,7 +8,9 @@ https://www.codingame.com/
 ## Training
 
 - [onboarding](training-easy-onboarding)
-- [onboarding](training-easy-the_descent)
+- [the_descent](training-easy-the_descent)
+- [power_of_thor-episode_1](training-easy-power_of_thor-episode_1)
+- [temperatures](training-easy-temperatures)
 
 ## Multiplayer
 
