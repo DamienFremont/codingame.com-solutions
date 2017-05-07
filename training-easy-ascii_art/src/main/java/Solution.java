@@ -24,38 +24,38 @@ class Model {
 	int letterHeight;
 	String asciiLetters;
 
-	int alphabetCount = 27;
+	static String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ? ";
+	static int ALPHABET_COUNT = 27;
 }
 
 class Bot {
 
 	List<String> find_solution(Model model) {
 		List<String> rows = new ArrayList<>();
-		for (int i = 0; i < model.text.length(); i++) {
-			char letter = model.text.charAt(i);
-			int iLetter = Data.get_index_from_letter(letter);
-			for (int iLetterRow = 0; iLetterRow < model.letterHeight; iLetterRow++) {
-				String letterRow = Data.get_letter_row(model, iLetter, iLetterRow);
-				rows.add(letterRow);
+		for (int iRow = 0; iRow < model.letterHeight; iRow++) {
+			String row = "";
+			for (int iText = 0; iText < model.text.length(); iText++) {
+				char letter = model.text.charAt(iText);
+				int iLetter = Data.get_index_from_letter(letter);
+				String letterRow = Data.get_letter_row(model, iLetter, iRow);
+				row += letterRow;
 			}
+			rows.add(row);
 		}
 		return rows;
 	}
 }
 
 class Data {
-	static String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ? ";
 
-	// static char get_letter_from_index(int index) {
-	// return alphabet.charAt(index);
-	// }
-	//
 	static int get_index_from_letter(char chaz) {
-		return alphabet.indexOf(String.valueOf(chaz).toUpperCase());
+		String upperChar = String.valueOf(chaz).toUpperCase();
+		int iLetter = Model.ALPHABET.indexOf(upperChar);
+		return iLetter;
 	}
 
 	static String get_letter_row(Model model, int iLetter, int iLetterRow) {
-		int rowWidth = (model.alphabetCount * model.letterWidth);
+		int rowWidth = (Model.ALPHABET_COUNT * model.letterWidth);
 		int beg = (iLetterRow * rowWidth) + (iLetter * model.letterWidth);
 		int end = (beg + model.letterWidth);
 		String letterRow = model.asciiLetters.substring(beg, end);
@@ -79,7 +79,7 @@ class Game {
 		}
 		Log.debug("L=%d, H=%d, T=%s", model.letterWidth, model.letterHeight, model.text);
 		Log.debug("ASCII=%s", model.asciiLetters);
-		for (int iLetter = 0; iLetter < model.alphabetCount; iLetter++) {
+		for (int iLetter = 0; iLetter < Model.ALPHABET_COUNT; iLetter++) {
 			Log.debug("letter[%d]", iLetter);
 			for (int iLetterRow = 0; iLetterRow < model.letterHeight; iLetterRow++) {
 				Log.debug("%s", Data.get_letter_row(model, iLetter, iLetterRow));
