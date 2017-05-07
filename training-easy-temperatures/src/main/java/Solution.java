@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,16 +28,19 @@ class Model {
 class Bot {
 
 	String next_action(Model model) {
+		if (model.temperatures.size() == 0) {
+			return "0";
+		}
 		Integer minTempPositiveOrNegative = Collections //
 				.min(model.temperatures, (p1, p2) -> Data.difference_from_0_between(p1, p2));
-		Log.debug("minTempPositivOrNegative=" + minTempPositiveOrNegative);
 		Integer minDiff = Data.difference_from_0(minTempPositiveOrNegative);
-		Log.debug("minDiff=" + minDiff);
 		Integer minTempPositive = model.temperatures //
 				.stream() //
 				.filter(i -> minDiff == Data.difference_from_0(i)) //
 				.max((p1, p2) -> Integer.compare(p1, p2)) //
 				.get();
+		Log.debug("minTempPositivOrNegative=" + minTempPositiveOrNegative);
+		Log.debug("minDiff=" + minDiff);
 		Log.debug("minTempPositive=" + minTempPositive);
 		return minTempPositive.toString();
 	}
@@ -64,14 +68,19 @@ class Game {
 			in.nextLine();
 		}
 		String temps = in.nextLine();
+		Log.debug("temps=%s", temps);
 		model.temperaturesCount = n;
-		model.temperatures = Arrays //
-				.asList(temps //
-						.split(" ")) //
-				.stream() //
-				.map(i -> Integer.valueOf(i)) //
-				.collect(Collectors.<Integer> toList());
-		;
+		if (model.temperaturesCount > 0) {
+			model.temperatures = Arrays //
+					.asList(temps //
+							.split(" ")) //
+					.stream() //
+					.map(i -> Integer.valueOf(i)) //
+					.collect(Collectors.<Integer> toList());
+			;
+		} else {
+			model.temperatures = new ArrayList<>();
+		}
 		Preconditions.check(model.temperaturesCount == model.temperatures.size());
 		Log.debug("temperaturesCount=%d", model.temperaturesCount);
 		Log.debug("temperatures=" + model.temperatures);
@@ -91,6 +100,7 @@ class Log {
 }
 
 class Preconditions {
+
 	static void check(boolean condition) {
 		if (!condition)
 			throw new RuntimeException("CONDITION FALSE");
