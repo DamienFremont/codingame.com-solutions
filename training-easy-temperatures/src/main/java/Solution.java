@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -26,21 +27,31 @@ class Model {
 class Bot {
 
 	String next_action(Model model) {
-		Integer minDiff = model.temperatures //
-				.stream() //
-				.min((p1, p2) -> Data.difference_from_0(p1, p2)) //
-				.get();
+		Integer minTempPositiveOrNegative = Collections //
+				.min(model.temperatures, (p1, p2) -> Data.difference_from_0_between(p1, p2));
+		Log.debug("minTempPositivOrNegative=" + minTempPositiveOrNegative);
+		Integer minDiff = Data.difference_from_0(minTempPositiveOrNegative);
 		Log.debug("minDiff=" + minDiff);
-		return minDiff.toString();
+		Integer minTempPositive = model.temperatures //
+				.stream() //
+				.filter(i -> minDiff == Data.difference_from_0(i)) //
+				.max((p1, p2) -> Integer.compare(p1, p2)) //
+				.get();
+		Log.debug("minTempPositive=" + minTempPositive);
+		return minTempPositive.toString();
 	}
 }
 
 class Data {
-	
-	static int difference_from_0(Integer p1, Integer p2) {
+
+	static int difference_from_0_between(Integer p1, Integer p2) {
 		return Integer.compare(//
-				Math.abs(0 - p1), //
-				Math.abs(0 - p2));
+				difference_from_0(p1), //
+				difference_from_0(p2));
+	}
+
+	static int difference_from_0(Integer p1) {
+		return Math.abs(0 - p1);
 	}
 
 }
