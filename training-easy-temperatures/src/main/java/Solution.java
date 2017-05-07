@@ -15,8 +15,8 @@ class Solution {
 		Bot bot = new Bot();
 
 		model = game.init(in, model);
-		String output = bot.next_action(model);
-		game.play(output);
+		String output = bot.find_solution(model);
+		game.solve(output);
 	}
 }
 
@@ -27,7 +27,7 @@ class Model {
 
 class Bot {
 
-	String next_action(Model model) {
+	String find_solution(Model model) {
 		if (model.temperatures.size() == 0) {
 			return "0";
 		}
@@ -68,7 +68,6 @@ class Game {
 			in.nextLine();
 		}
 		String temps = in.nextLine();
-		Log.debug("temps=%s", temps);
 		model.temperaturesCount = n;
 		if (model.temperaturesCount > 0) {
 			model.temperatures = Arrays //
@@ -87,7 +86,7 @@ class Game {
 		return model;
 	}
 
-	void play(String output) {
+	void solve(String output) {
 		System.out.println(output);
 	}
 }
