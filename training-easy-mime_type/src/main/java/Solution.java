@@ -1,31 +1,88 @@
-import java.util.*;
-import java.io.*;
-import java.math.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Scanner;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 class Solution {
 
-    public static void main(String args[]) {
-        Scanner in = new Scanner(System.in);
-        int N = in.nextInt(); // Number of elements which make up the association table.
-        int Q = in.nextInt(); // Number Q of file names to be analyzed.
-        for (int i = 0; i < N; i++) {
-            String EXT = in.next(); // file extension
-            String MT = in.next(); // MIME type.
-        }
-        in.nextLine();
-        for (int i = 0; i < Q; i++) {
-            String FNAME = in.nextLine(); // One file name per line.
-        }
+	public static void main(String args[]) {
+		Scanner in = new Scanner(System.in);
+		Game game = new Game();
+		Model model = new Model();
+		Bot bot = new Bot();
+		model = game.init(in, model);
+		List<String> outputs = bot.find_solution(model);
+		game.solve(outputs);
+	}
+}
 
-        // Write an action using System.out.println()
-        // To debug: System.err.println("Debug messages...");
+class Model {
+	int n;
+	int q;
+	Map<String,String> nLine;
+	List<String> qLine;
+}
 
+class Bot {
 
-        // For each of the Q filenames, display on a line the corresponding MIME type. If there is no corresponding type, then display UNKNOWN.
-        System.out.println("UNKNOWN");
-    }
+	List<String> find_solution(Model model) {
+		List<String> rows = new ArrayList<>();
+		return rows;
+	}
+}
+
+class Data {
+
+}
+
+class Game {
+
+	Model init(Scanner in, Model model) {
+		model.n = in.nextInt();
+		model.q = in.nextInt();
+		model.nLine = new HashMap<>();
+		for (int i = 0; i < model.n; i++) {
+			String EXT = in.next();
+			String MT = in.next();
+			model.nLine.put(EXT, MT);
+		}
+		in.nextLine();
+		model.qLine = new ArrayList<>();
+		for (int i = 0; i < model.q; i++) {
+			String FNAME = in.nextLine();
+			model.qLine.add(FNAME);
+		}
+		Log.debug("%d", model.n);
+		Log.debug("%d", model.q);
+		for (Entry<String, String> i : model.nLine.entrySet()) {
+			Log.debug("%s %s", i.getKey(), i.getValue());
+		}
+		for (String i : model.qLine) {
+			Log.debug("%s", i);
+		}
+		return model;
+	}
+
+	void solve(List<String> outputs) {
+		for (String i : outputs) {
+			System.out.println(i);
+		}
+	}
+}
+
+class Log {
+
+	static void debug(String pattern, Object... values) {
+		System.err.println(String.format(pattern, values));
+	}
+}
+
+class Preconditions {
+
+	static void check(boolean condition) {
+		if (!condition)
+			throw new RuntimeException("CONDITION FALSE");
+	}
 }
