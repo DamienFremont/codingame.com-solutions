@@ -31,7 +31,12 @@ class Bot {
 		List<String> rows = new ArrayList<>();
 		for (String FNAME : model.qLine) {
 			String EXT = FNAME.split("\\.")[1];
-			String MT = model.nLine.get(EXT);
+			String MT;
+			if (model.nLine.containsKey(EXT)) {
+				MT = model.nLine.get(EXT);
+			} else {
+				MT = "UNKNOWN";
+			}
 			rows.add(MT);
 		}
 		return rows;
