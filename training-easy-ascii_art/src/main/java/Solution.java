@@ -18,14 +18,16 @@ class Solution {
 }
 
 class Model {
+	
 	String text;
 
 	int letterWidth;
 	int letterHeight;
 	String asciiLetters;
 
-	static String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ? ";
+	static String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ?";
 	static int ALPHABET_COUNT = 27;
+	static int DEFAULT_LETTER_INDEX = 26;
 }
 
 class Bot {
@@ -51,7 +53,9 @@ class Data {
 	static int get_index_from_letter(char chaz) {
 		String upperChar = String.valueOf(chaz).toUpperCase();
 		int iLetter = Model.ALPHABET.indexOf(upperChar);
-		return iLetter;
+		boolean isInInterval = (iLetter == -1);
+		int iLetterValid = (isInInterval ? Model.DEFAULT_LETTER_INDEX : iLetter);
+		return iLetterValid;
 	}
 
 	static String get_letter_row(Model model, int iLetter, int iLetterRow) {
