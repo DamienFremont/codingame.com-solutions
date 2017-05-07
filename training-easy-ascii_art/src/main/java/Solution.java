@@ -12,7 +12,7 @@ class Solution {
 		Bot bot = new Bot();
 
 		model = game.init(in, model);
-		String output = bot.find_solution(model);
+		List<String> output = bot.find_solution(model);
 		game.solve(output);
 	}
 }
@@ -24,37 +24,42 @@ class Model {
 	int letterHeight;
 	String asciiLetters;
 
-	int alphabetCount = 26;
+	int alphabetCount = 27;
 }
 
 class Bot {
 
-	String find_solution(Model model) {
-		return "#";
+	List<String> find_solution(Model model) {
+		List<String> rows = new ArrayList<>();
+		for (int i = 0; i < model.text.length(); i++) {
+			char letter = model.text.charAt(i);
+			int iLetter = Data.get_index_from_letter(letter);
+			for (int iLetterRow = 0; iLetterRow < model.letterHeight; iLetterRow++) {
+				String letterRow = Data.get_letter_row(model, iLetter, iLetterRow);
+				rows.add(letterRow);
+			}
+		}
+		return rows;
 	}
 }
 
 class Data {
-	static String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ? ";
 
-	static char char_from_index(int index) {
-		return alphabet.charAt(index);
-	}
-
-	static int index_from_char(char chaz) {
+	// static char get_letter_from_index(int index) {
+	// return alphabet.charAt(index);
+	// }
+	//
+	static int get_index_from_letter(char chaz) {
 		return alphabet.indexOf(String.valueOf(chaz).toUpperCase());
 	}
 
-	static String get_char_row(int index) {
-//		for (int iLetter = 0; iLetter < model.alphabetCount; iLetter++) {
-//			String letterRows = model.chars.get(iLetter);
-//			Log.debug("letter %d(%s)=%s", iLetter, Data.char_from_index(iLetter), letterRows);
-//			for (int iRow = 0; iRow < H; iRow++) {
-//				int beg = iLetter + iRow * L;
-//				int end = iLetter + L + iRow * L;
-//				Log.debug(letterRows.substring(beg, end));
-//			}
-		return " ";
+	static String get_letter_row(Model model, int iLetter, int iLetterRow) {
+		int rowWidth = (model.alphabetCount * model.letterWidth);
+		int beg = (iLetterRow * rowWidth) + (iLetter * model.letterWidth);
+		int end = (beg + model.letterWidth);
+		String letterRow = model.asciiLetters.substring(beg, end);
+		return letterRow;
 	}
 }
 
@@ -74,11 +79,19 @@ class Game {
 		}
 		Log.debug("L=%d, H=%d, T=%s", model.letterWidth, model.letterHeight, model.text);
 		Log.debug("ASCII=%s", model.asciiLetters);
+		for (int iLetter = 0; iLetter < model.alphabetCount; iLetter++) {
+			Log.debug("letter[%d]", iLetter);
+			for (int iLetterRow = 0; iLetterRow < model.letterHeight; iLetterRow++) {
+				Log.debug("%s", Data.get_letter_row(model, iLetter, iLetterRow));
+			}
+		}
 		return model;
 	}
 
-	void solve(String output) {
-		System.out.println(output);
+	void solve(List<String> outputLines) {
+		for (String line : outputLines) {
+			System.out.println(line);
+		}
 	}
 }
 
