@@ -30,21 +30,28 @@ class Bot {
 	List<String> find_solution(Model model) {
 		List<String> rows = new ArrayList<>();
 		for (String FNAME : model.qLine) {
-			String EXT = FNAME.split("\\.")[1];
-			String MT;
-			if (model.nLine.containsKey(EXT)) {
-				MT = model.nLine.get(EXT);
-			} else {
-				MT = "UNKNOWN";
-			}
+			String EXT = Data.get_file_extension(FNAME);
+			boolean isEXTKnown = model.nLine.containsKey(EXT);
+			String MT = (isEXTKnown ? model.nLine.get(EXT) : "UNKNOWN");
 			rows.add(MT);
 		}
 		return rows;
 	}
+
 }
 
 class Data {
 
+	static String get_file_extension(String FNAME) {
+		try {
+			int lastIndexOf = FNAME.lastIndexOf(".");
+			if (-1 == lastIndexOf)
+				return "";
+			return FNAME.substring(lastIndexOf + 1);
+		} catch (Exception e) {
+			return "";
+		}
+	}
 }
 
 class Game {
