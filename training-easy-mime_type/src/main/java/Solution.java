@@ -21,7 +21,7 @@ class Solution {
 class Model {
 	int n;
 	int q;
-	Map<String,String> nLine;
+	Map<String, String> nLine;
 	List<String> qLine;
 }
 
@@ -29,6 +29,11 @@ class Bot {
 
 	List<String> find_solution(Model model) {
 		List<String> rows = new ArrayList<>();
+		for (String FNAME : model.qLine) {
+			String EXT = FNAME.split("\\.")[1];
+			String MT = model.nLine.get(EXT);
+			rows.add(MT);
+		}
 		return rows;
 	}
 }
@@ -54,6 +59,8 @@ class Game {
 			String FNAME = in.nextLine();
 			model.qLine.add(FNAME);
 		}
+		Preconditions.check(model.n == model.nLine.size());
+		Preconditions.check(model.q == model.qLine.size());
 		Log.debug("%d", model.n);
 		Log.debug("%d", model.q);
 		for (Entry<String, String> i : model.nLine.entrySet()) {
