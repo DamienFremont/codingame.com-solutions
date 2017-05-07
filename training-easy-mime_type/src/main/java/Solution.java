@@ -47,7 +47,7 @@ class Data {
 			int lastIndexOf = FNAME.lastIndexOf(".");
 			if (-1 == lastIndexOf)
 				return "";
-			return FNAME.substring(lastIndexOf + 1);
+			return FNAME.substring(lastIndexOf + 1).toLowerCase();
 		} catch (Exception e) {
 			return "";
 		}
@@ -63,7 +63,7 @@ class Game {
 		for (int i = 0; i < model.n; i++) {
 			String EXT = in.next();
 			String MT = in.next();
-			model.nLine.put(EXT, MT);
+			model.nLine.put(EXT.toLowerCase(), MT);
 		}
 		in.nextLine();
 		model.qLine = new ArrayList<>();
