@@ -11,6 +11,7 @@ https://www.codingame.com/
 - [the_descent](training-easy-the_descent)
 - [power_of_thor-episode_1](training-easy-power_of_thor-episode_1)
 - [temperatures](training-easy-temperatures)
+- [ascii_art](training-easy-ascii_art)
 
 ## Multiplayer
 
