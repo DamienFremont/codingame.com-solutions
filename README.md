@@ -12,6 +12,8 @@ https://www.codingame.com/
 - [power_of_thor-episode_1](training-easy-power_of_thor-episode_1)
 - [temperatures](training-easy-temperatures)
 - [ascii_art](training-easy-ascii_art)
+- [mime_type](training-easy-mime_type)
+- [chuck_norris](training-easy-chuck_norris)
 
 ## Multiplayer
 
