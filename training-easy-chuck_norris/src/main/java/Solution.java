@@ -16,12 +16,14 @@ class Solution {
 class Bot {
 	static Charset CHARSET = StandardCharsets.US_ASCII;
 	static int CHARSET_SIZE = 7;
+	static int BYTE_SIZE = 8;
 
 	static String solve(String MESSAGE) {
 		String answer = "";
 		boolean[] booleanArray;
 		byte[] bytes = MESSAGE.getBytes(CHARSET);
-		booleanArray = toBooleanArray(bytes, CHARSET_SIZE);
+		booleanArray = toBooleanArray(bytes);
+		booleanArray = shrinkBytesFromTo(booleanArray, BYTE_SIZE, CHARSET_SIZE);
 		booleanArray = reverseArray(booleanArray);
 		int serieValue = -1;
 		for (boolean c : booleanArray) {
@@ -36,13 +38,30 @@ class Bot {
 		return answer.substring(1);
 	}
 
-	private static boolean isNewSerie(int serieValue, int myInt) {
+	static boolean[] shrinkBytesFromTo(boolean[] array, int oldByteSize, int newByteSize) {
+		int byteCount = (array.length / oldByteSize);
+		int newArraySize = (byteCount * newByteSize);
+		boolean[] newArray = new boolean[newArraySize];
+		int iNew = 0;
+		for (int iByte = 0; iByte < byteCount; iByte++) {
+			for (int iBool = 0; iBool < oldByteSize; iBool++) {
+				if (iBool < newByteSize) {
+					int iOld = iBool +iByte*oldByteSize;
+					newArray[iNew] = array[iOld];
+					iNew++;
+				}
+			}
+		}
+		return newArray;
+	}
+
+	static boolean isNewSerie(int serieValue, int myInt) {
 		return serieValue != myInt;
 	}
 
-	static boolean[] toBooleanArray(byte[] bytes, int charsetSize) {
+	static boolean[] toBooleanArray(byte[] bytes) {
 		BitSet bits = BitSet.valueOf(bytes);
-		boolean[] bools = new boolean[bytes.length * charsetSize];
+		boolean[] bools = new boolean[bytes.length * 8];
 		for (int i = bits.nextSetBit(0); i != -1; i = bits.nextSetBit(i + 1)) {
 			bools[i] = true;
 		}
