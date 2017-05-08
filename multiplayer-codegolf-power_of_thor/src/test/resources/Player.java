@@ -1,10 +1,7 @@
 class Player {
 	public static void main(String s[]) {
 		java.util.Scanner i = new java.util.Scanner(System.in);
-		int x = i.nextInt();
-		int y = i.nextInt();
-		int a = i.nextInt();
-		int b = i.nextInt();
+		int x = i.nextInt(), y = i.nextInt(), a = i.nextInt(), b = i.nextInt();
 		while (true) {
 			int t = i.nextInt();
 			String p = "";
