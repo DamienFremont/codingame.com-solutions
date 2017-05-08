@@ -11,12 +11,6 @@ public class MinifierTest {
 		Minifier.minify(argument);
 	}
 
-	@Test
-	public void test_2() throws IOException {
-		String argument = getPath("Player2.java");
-		Minifier.minify(argument);
-	}
-
 	private String getPath(String resourceName) throws IOException {
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 		File file = new File(classLoader.getResource(resourceName).getFile());
