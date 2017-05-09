@@ -1,23 +1,27 @@
-import java.util.*;
-import java.io.*;
-import java.math.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 class Solution {
 
-    public static void main(String args[]) {
-        Scanner in = new Scanner(System.in);
-        int N = in.nextInt();
-        for (int i = 0; i < N; i++) {
-            int pi = in.nextInt();
-        }
+	public static void main(String args[]) {
+		Scanner in = new Scanner(System.in);
+		int N = in.nextInt();
+		List<Integer> all = new ArrayList<>();
+		for (int i = 0; i < N; i++) {
+			int pi = in.nextInt();
+			all.add(pi);
+		}
 
-        // Write an action using System.out.println()
-        // To debug: System.err.println("Debug messages...");
-
-        System.out.println("answer");
-    }
+		Collections.sort(all, (p1, p2) -> Integer.compare(p1, p2));
+		int closest = -1;
+		for (int i = 0; i < all.size() - 1; i++) {
+			int diff = Math.abs(Integer.compare(all.get(i), all.get(i + 1)));
+			if (diff < closest || closest == -1)
+				closest = diff;
+		}
+		
+		System.out.println("" + closest);
+	}
 }
