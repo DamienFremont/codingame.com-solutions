@@ -1,7 +1,6 @@
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +10,7 @@ import org.assertj.core.api.Assertions;
 
 public class TestCase {
 
-	static void execute(String id, Runnable function) throws IOException {
+	static void execute(String id, Runnable function) {
 		InputStream oldIn = System.in;
 		PrintStream oldOut = System.out;
 		try {
@@ -34,9 +33,13 @@ public class TestCase {
 		}
 	}
 
-	private static String loadResource(String resourceName) throws IOException {
-		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		File file = new File(classLoader.getResource(resourceName).getFile());
-		return new String(Files.readAllBytes(file.toPath()));
+	private static String loadResource(String resourceName) {
+		try {
+			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+			File file = new File(classLoader.getResource(resourceName).getFile());
+			return new String(Files.readAllBytes(file.toPath()));
+		} catch (Exception e) {
+			throw new RuntimeException();
+		}
 	}
 }
