@@ -27,7 +27,7 @@ public class TestCase {
 			String result = new String(baos.toByteArray(), StandardCharsets.UTF_8);
 			// THEN
 			String expected = loadResource("test_case-" + id + "-output.txt");
-			Assertions.assertThat(result).isEqualTo(expected);
+			Assertions.assertThat(result).startsWith(expected);
 		} finally {
 			System.setIn(oldIn);
 			System.setOut(oldOut);
