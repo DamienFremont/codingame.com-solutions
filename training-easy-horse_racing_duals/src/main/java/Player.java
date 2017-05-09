@@ -17,11 +17,13 @@ class Solution {
 		Collections.sort(all, (p1, p2) -> Integer.compare(p1, p2));
 		int closest = -1;
 		for (int i = 0; i < all.size() - 1; i++) {
-			int diff = Math.abs(Integer.compare(all.get(i), all.get(i + 1)));
-			if (diff < closest || closest == -1)
+			int p1 = all.get(i);
+			int p2 = all.get(i + 1);
+			int diff = Math.abs(p1 - p2);
+			if ((diff < closest) || (closest == -1))
 				closest = diff;
 		}
-		
+
 		System.out.println("" + closest);
 	}
 }
