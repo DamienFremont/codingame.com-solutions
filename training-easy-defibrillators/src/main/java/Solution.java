@@ -16,10 +16,10 @@ class Solution {
 		String answer = null;
 		double answerDist = -1;
 		for (int i = 0; i < N; i++) {
-			String DEFIB = in.nextLine();
-			double dist = distance(LON, LAT, DEFIB.split(";")[4], DEFIB.split(";")[5]);
+			String[] DEFIB = in.nextLine().split(";");
+			double dist = distance(LON, LAT, DEFIB[4], DEFIB[5]);
 			if (dist < answerDist || answerDist ==-1) {
-				answer = DEFIB.split(";")[1];
+				answer = DEFIB[1];
 				answerDist = dist;
 			}
 		}
