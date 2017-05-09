@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.damienfremont.codingame</groupId>
-	<artifactId>codingame-training-easy-training-easy-mars_lander_episode_1</artifactId>
+	<artifactId>codingame-training-easy-mars_lander_episode_1</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
