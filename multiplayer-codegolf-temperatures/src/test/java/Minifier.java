@@ -18,7 +18,9 @@ public class Minifier {
 		content = content.replaceAll("\r", ""); 
 		// operators
 		content = content.replaceAll(" = ", "=");
-		content = content.replaceAll(" = ", "=");
+		content = content.replaceAll(" == ", "==");
+		content = content.replaceAll(" \\|\\| ", "\\|\\|");
+		content = content.replaceAll(" && ", "&&");
 		content = content.replaceAll(" \\+= ", "\\+=");
 		content = content.replaceAll(" \\-= ", "\\-=");
 		content = content.replaceAll(" \\? ", "\\?");
