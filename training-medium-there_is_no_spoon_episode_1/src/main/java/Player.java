@@ -22,31 +22,48 @@ class Model {
 class Bot {
 
 	static List<String> solve(Model model) {
-		List<String> res = new ArrayList<>();
+		List<String> answers = new ArrayList<>();
 		for (int y = 0; y < model.height; y++) {
 			for (int x = 0; x < model.width; x++) {
-				if (isNodeExist(model, y, x)) {
+				if (exist(model, x, y)) {
 					int xRight = -1, yRight = -1;
-					if (isNodeExist(model, y, x + 1)) {
-						xRight = x + 1;
+					int xBottm = -1, yBottm = -1;
+					if (-1 != right(model, x, y)) {
+						xRight = right(model, x, y);
 						yRight = y;
 					}
-					int xBottm = -1, yBottm = -1;
-					if (isNodeExist(model, y + 1, x)) {
+					if (-1 != bottom(model, x, y)) {
 						xBottm = x;
-						yBottm = y + 1;
+						yBottm = bottom(model, x, y);
 					}
-					res.add(String.format("%d %d %d %d %d %d", //
+					String answer = String.format("%d %d %d %d %d %d", //
 							x, y, //
 							xRight, yRight, //
-							xBottm, yBottm));
+							xBottm, yBottm);
+					answers.add(answer);
 				}
 			}
 		}
-		return res;
+		return answers;
 	}
 
-	private static boolean isNodeExist(Model model, int y, int x) {
+	static int right(Model model, int x, int y) {
+		for (int xx = (x + 1); xx < model.width; xx++) {
+			if (exist(model, xx, y))
+				return xx;
+		}
+		return -1;
+	}
+
+	static int bottom(Model model, int x, int y) {
+		for (int yy = (y + 1); yy < model.height; yy++) {
+			if (exist(model, x, yy))
+				return yy;
+		}
+		return -1;
+	}
+
+	static boolean exist(Model model, int x, int y) {
 		return y < model.height //
 				&& x < model.width //
 				&& model.grid[x][y];
@@ -78,10 +95,10 @@ class Game {
 
 	static void log(Model model) {
 		Log.debug("%d %d", model.width, model.height);
-		for (int i = 0; i < model.height; i++) {
+		for (int y = 0; y < model.height; y++) {
 			String line = "";
-			for (int j = 0; j < model.width; j++) {
-				line += model.grid[i][j] ? "0" : ".";
+			for (int x = 0; x < model.width; x++) {
+				line += model.grid[x][y] ? "0" : ".";
 			}
 			Log.debug("%s", line);
 		}
