@@ -1,4 +1,4 @@
-# codingame
+# CODINGAME
 My code to compete at CodingGame.
 
 https://www.codingame.com/

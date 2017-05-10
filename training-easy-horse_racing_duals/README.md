@@ -1,4 +1,4 @@
-# codingame-training-easy-mars_lander_episode_1
+# codingame-training-easy-horse_racing_duals
 Difficulty : Easy Community success rate: 79%
 
 https://www.codingame.com/training/easy/horse-racing-duals

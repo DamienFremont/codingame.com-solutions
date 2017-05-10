@@ -1,4 +1,4 @@
-# codingame-training-easy-the_descent
+# codingame-training-easy-power_of_thor-episode_1
 Difficulty : Easy Community success rate: 62%
 
 https://www.codingame.com/training/easy/power-of-thor-episode-1
