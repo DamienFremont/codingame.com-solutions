@@ -31,7 +31,7 @@ https://www.codingame.com/
 
 ### BOT PROGRAMMING
 - [Ghost in the Cell](multiplayer-bot_programming-ghost_in_the_cell)
-- [CCoders Strike Back](multiplayer-bot_programming-coders_strike_back)
+- [Coders Strike Back](multiplayer-bot_programming-coders_strike_back)
 
 ### CODE GOLF
 - [Temperatures](multiplayer-codegolf-temperatures)
