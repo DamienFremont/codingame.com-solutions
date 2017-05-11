@@ -31,18 +31,23 @@ class Bot {
 
 	static Model solve(Model model) {
 		Log.debug("SOLVE =======================");
-		int EI = nearest_gateway(model);
-		Log.debug("CONTEXT: gate=%d, virus=%d", EI, model.SI);
-		Tree<Integer> tree = scan(model, EI);
-		Tree<Integer> solution = tree.nodes.stream() //
-				.filter(i -> i.childs.isEmpty()) //
+		List<Tree<Integer>> threats = new ArrayList<>();
+		for (Integer EI : model.gateways) {
+			Tree<Integer> tree = scan(model, EI);
+			Tree<Integer> solution = tree.nodes.stream() //
+					.filter(i -> i.childs.isEmpty()) //
+					.min((p1, p2) -> Integer.compare(p1.depth(), p2.depth())) //
+					.get();
+			threats.add(solution);
+		}
+		Tree<Integer> nearest = threats.stream() //
 				.min((p1, p2) -> Integer.compare(p1.depth(), p2.depth())) //
 				.get();
-		Model.Link link = find_link(model, solution.val, solution.parent.val);
-		Log.debug("SOLUTION (FIN): %s, remove link [%d,%d]", solution.path(), link.N1, link.N2);
+		Model.Link link = find_link(model, nearest.val, nearest.parent.val);
 		model.C1 = link.N1;
 		model.C2 = link.N2;
 		model.links.remove(link);
+		Log.debug("SOLUTION (FIN): %s, remove link [%d,%d]", nearest.path(), link.N1, link.N2);
 		return model;
 	}
 
@@ -62,7 +67,7 @@ class Bot {
 			int id = get_child(link, parent.val);
 			Tree<Integer> child = new Tree<>(id, parent);
 			if (success.apply(id) || parent.depth() >= SCAN_MAX) {
-//				Log.debug("SOLUTION (TMP): %s", child.path());
+				// Log.debug("SOLUTION (TMP): %s", child.path());
 			} else {
 				child.childs = childs(model, child, success);
 			}
@@ -89,9 +94,6 @@ class Bot {
 				.get();
 	}
 
-	static int nearest_gateway(Model model) {
-		return model.gateways.get(0);
-	}
 }
 
 class Tree<T> {
