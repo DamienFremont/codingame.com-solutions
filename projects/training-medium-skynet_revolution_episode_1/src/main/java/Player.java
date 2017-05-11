@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class Player {
 	public static void main(String args[]) {
@@ -21,24 +23,70 @@ class Model {
 
 	static class Link {
 		int N1, N2;
-		boolean cutted;
 	}
 }
 
 class Bot {
+	static int SCAN_MAX = 3;
+
 	static Model solve(Model model) {
+		Log.debug("SOLVE =======================");
 		int EI = nearest_gateway(model);
-		Model.Link link = find_link(model, EI);
-		link.cutted = true;
+		Log.debug("CONTEXT: gate=%d, virus=%d", EI, model.SI);
+		Tree<Integer> tree = scan(model, EI);
+		Tree<Integer> solution = tree.nodes.stream() //
+				.filter(i -> i.childs.isEmpty()) //
+				.min((p1, p2) -> Integer.compare(p1.depth(), p2.depth())) //
+				.get();
+		Model.Link link = find_link(model, solution.val, solution.parent.val);
+		Log.debug("SOLUTION (FIN): %s, remove link [%d,%d]", solution.path(), link.N1, link.N2);
 		model.C1 = link.N1;
 		model.C2 = link.N2;
+		model.links.remove(link);
 		return model;
 	}
 
-	static Model.Link find_link(Model model, int EI) {
+	static Tree<Integer> scan(Model model, int EI) {
+		int startNode = model.SI;
+		int endNode = EI;
+		Function<Integer, Boolean> success = i -> (i == endNode);
+		Tree<Integer> tree = new Tree<>(startNode);
+		tree.childs = childs(model, tree, success);
+		return tree;
+	}
+
+	private static List<Tree<Integer>> childs(Model model, Tree<Integer> parent, Function<Integer, Boolean> success) {
+		List<Tree<Integer>> childs = new ArrayList<>();
+		List<Model.Link> links = find_link(model, parent.val);
+		for (Model.Link link : links) {
+			int id = get_child(link, parent.val);
+			Tree<Integer> child = new Tree<>(id, parent);
+			if (success.apply(id) || parent.depth() >= SCAN_MAX) {
+//				Log.debug("SOLUTION (TMP): %s", child.path());
+			} else {
+				child.childs = childs(model, child, success);
+			}
+			childs.add(child);
+		}
+		return childs;
+	}
+
+	private static int get_child(Model.Link link, int val) {
+		return val == link.N1 ? link.N2 : link.N1;
+	}
+
+	static List<Model.Link> find_link(Model model, int A) {
 		return model.links.stream() //
-				.filter(i -> (EI == i.N1 || EI == i.N2) && i.cutted == false) //
-				.findFirst().get();
+				.filter(i -> i.N1 == A || i.N2 == A) //
+				.collect(Collectors.toList());
+	}
+
+	static Model.Link find_link(Model model, int A, int B) {
+		return model.links.stream() //
+				.filter(i -> (i.N1 == A && i.N2 == B)//
+						|| (i.N1 == B && i.N2 == A)) //
+				.findFirst()//
+				.get();
 	}
 
 	static int nearest_gateway(Model model) {
@@ -46,9 +94,55 @@ class Bot {
 	}
 }
 
+class Tree<T> {
+	T val;
+
+	List<Tree<T>> childs;
+	Tree<T> parent;
+
+	List<Tree<T>> nodes;
+
+	Tree(T val) {
+		this.val = val;
+		this.nodes = new ArrayList<>();
+		this.childs = new ArrayList<>();
+	}
+
+	Tree(T val, Tree<T> parent) {
+		this(val);
+		this.parent = parent;
+		this.nodes = parent.nodes;
+		this.nodes.add(this);
+	}
+
+	public int size() {
+		int size = 1;
+		for (Tree<?> i : childs)
+			size += i.size();
+		return size;
+	}
+
+	public int height() {
+		int height = 1;
+		for (Tree<?> i : childs)
+			height += i.height();
+		return height;
+	}
+
+	public int depth() {
+		int parentDepth = parent == null ? 0 : parent.depth();
+		return 1 + parentDepth;
+	}
+
+	public String path() {
+		String parenPath = parent == null ? "START" : parent.path();
+		return String.format("%s->%s", parenPath, val);
+	}
+}
+
 class Game {
 	static Model init(Scanner in) {
-		Log.debug("init");
+		Log.debug("INIT =======================");
 		Model model = new Model();
 		model.N = in.nextInt();
 		model.L = in.nextInt();
@@ -73,7 +167,7 @@ class Game {
 	}
 
 	static Model turn(Scanner in, Model model) {
-		Log.debug("turn");
+		Log.debug("TURN =======================");
 		model.SI = in.nextInt();
 		Log.debug("%d", model.SI);
 		return model;
