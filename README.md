@@ -9,6 +9,7 @@ https://www.codingame.com/
 ## PRACTICE
 
 ### CLASSIC PUZZLE - MEDIUM
+- [Skynet Revolution - Episode 1](projects/training-medium-skynet_revolution_episode_1)
 - [There is no Spoon - Episode 1](projects/training-medium-there_is_no_spoon_episode_1)
 
 ### CLASSIC PUZZLE - EASY
