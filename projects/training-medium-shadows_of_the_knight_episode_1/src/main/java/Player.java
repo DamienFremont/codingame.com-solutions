@@ -1,31 +1,91 @@
-import java.util.*;
-import java.io.*;
-import java.math.*;
+import java.util.Scanner;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
+import javax.management.RuntimeErrorException;
+
 class Player {
+	public static void main(String args[]) {
+		Scanner in = new Scanner(System.in);
+		Model model = Game.init(in);
+		while (in.hasNext()) {
+			model = Game.turn(in, model);
+			model = Bot.solve(model);
+			Game.play(model);
+		}
+	}
+}
 
-    public static void main(String args[]) {
-        Scanner in = new Scanner(System.in);
-        int W = in.nextInt(); // width of the building.
-        int H = in.nextInt(); // height of the building.
-        int N = in.nextInt(); // maximum number of turns before game over.
-        int X0 = in.nextInt();
-        int Y0 = in.nextInt();
+class Model {
+	int W, H;
+	int N;
+	Point startPos;
+	Direction bombDir;
+	Point nextJump;
 
-        // game loop
-        while (true) {
-            String bombDir = in.next(); // the direction of the bombs from batman's current location (U, UR, R, DR, D, DL, L or UL)
+	static enum Direction {
+		U, UR, R, DR, D, DL, L, UL
+	}
 
-            // Write an action using System.out.println()
-            // To debug: System.err.println("Debug messages...");
+}
 
+class Bot {
+	static Model solve(Model model) {
+		Log.debug("SOLVE =======================");
+		Point next = new Point();
+		Point posi = model.nextJump == null ? model.startPos : model.nextJump;
+		switch (model.bombDir) {
+		case DR:
+			next.x = posi.x + 1;
+			next.y = posi.y + 1;
+			break;
+		case D:
+			next.x = posi.x;
+			next.y = posi.y + 1;
+			break;
+		default:
+			throw new RuntimeException();
+		}
+		model.nextJump = next;
+		Log.debug("SOLUTION: nextJump=%d,%d", model.nextJump.x, model.nextJump.y);
+		return model;
+	}
+}
 
-            // the location of the next window Batman should jump to.
-            System.out.println("0 0");
-        }
-    }
+class Game {
+	static Model init(Scanner in) {
+		Log.debug("INIT =======================");
+		Model model = new Model();
+		model.W = in.nextInt();
+		model.H = in.nextInt();
+		model.N = in.nextInt();
+		model.startPos = new Point();
+		model.startPos.x = in.nextInt();
+		model.startPos.y = in.nextInt();
+		Log.debug("%d %d", model.W, model.H);
+		Log.debug("%d", model.N);
+		Log.debug("%d %d", model.startPos.x, model.startPos.y);
+		return model;
+	}
+
+	static Model turn(Scanner in, Model model) {
+		Log.debug("TURN =======================");
+		model.bombDir = Model.Direction.valueOf(in.next());
+		Log.debug("%s", model.bombDir);
+		return model;
+	}
+
+	static void play(Model model) {
+		System.out.println(String.format("%d %d", model.nextJump.x, model.nextJump.y));
+	}
+}
+
+// UTILS
+
+class Log {
+	static void debug(String pattern, Object... values) {
+		System.err.println(String.format(pattern, values));
+	}
+}
+
+class Point {
+	int x, y;
 }
