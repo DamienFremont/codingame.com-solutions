@@ -30,21 +30,15 @@ class Model {
 class Bot {
 	static Model solve(Model model) {
 		Log.debug("SOLVE =======================");
-		Point next = new Point();
-		Point posi = model.nextJump == null ? model.startPos : model.nextJump;
-		switch (model.bombDir) {
-		case DR:
-			next.x = posi.x + 1;
-			next.y = posi.y + 1;
-			break;
-		case D:
-			next.x = posi.x;
-			next.y = posi.y + 1;
-			break;
-		default:
-			throw new RuntimeException();
-		}
-		model.nextJump = next;
+		model.nextJump = model.nextJump == null ? model.startPos : model.nextJump;
+		if (model.bombDir.toString().contains("U"))
+			model.nextJump.y--;
+		if (model.bombDir.toString().contains("D"))
+			model.nextJump.y++;
+		if (model.bombDir.toString().contains("L"))
+			model.nextJump.x--;
+		if (model.bombDir.toString().contains("R"))
+			model.nextJump.x++;
 		Log.debug("SOLUTION: nextJump=%d,%d", model.nextJump.x, model.nextJump.y);
 		return model;
 	}
