@@ -1,7 +1,5 @@
 import java.util.Scanner;
 
-import javax.management.RuntimeErrorException;
-
 class Player {
 	public static void main(String args[]) {
 		Scanner in = new Scanner(System.in);
@@ -17,29 +15,37 @@ class Player {
 class Model {
 	int W, H;
 	int N;
-	Point startPos;
-	Direction bombDir;
-	Point nextJump;
+	int X0, Y0;
 
-	static enum Direction {
-		U, UR, R, DR, D, DL, L, UL
-	}
+	String bombDir;
+	int X, Y;
 
+	int X_MIN, X_MAX, Y_MIN, Y_MAX;
 }
 
 class Bot {
 	static Model solve(Model model) {
 		Log.debug("SOLVE =======================");
-		model.nextJump = model.nextJump == null ? model.startPos : model.nextJump;
-		if (model.bombDir.toString().contains("U"))
-			model.nextJump.y--;
-		if (model.bombDir.toString().contains("D"))
-			model.nextJump.y++;
-		if (model.bombDir.toString().contains("L"))
-			model.nextJump.x--;
-		if (model.bombDir.toString().contains("R"))
-			model.nextJump.x++;
-		Log.debug("SOLUTION: nextJump=%d,%d", model.nextJump.x, model.nextJump.y);
+		Log.debug("AREA: X[%d,%d],Y[%d,%d]", model.X_MIN, model.X_MAX, model.Y_MIN, model.Y_MAX);
+		if (model.bombDir.contains("U")) {
+			model.Y_MAX = model.Y - 1;
+			int marge = Math.abs((model.Y_MAX - model.Y_MIN) / 2);
+			model.Y = model.Y_MAX - marge;
+		} else if (model.bombDir.contains("D")) {
+			model.Y_MIN = model.Y + 1;
+			int marge = Math.abs((model.Y_MAX - model.Y_MIN) / 2);
+			model.Y = model.Y_MIN + marge;
+		}
+		if (model.bombDir.contains("L")) {
+			model.X_MAX = model.X - 1;
+			int marge = Math.abs((model.X_MAX - model.X_MIN) / 2);
+			model.X = model.X_MAX - marge;
+		} else if (model.bombDir.contains("R")) {
+			model.X_MIN = model.X + 1;
+			int marge = Math.abs((model.X_MAX - model.X_MIN) / 2);
+			model.X = model.X_MIN + marge;
+		}
+		Log.debug("SOLUTION: nextJump=%d,%d", model.X, model.Y);
 		return model;
 	}
 }
@@ -51,24 +57,26 @@ class Game {
 		model.W = in.nextInt();
 		model.H = in.nextInt();
 		model.N = in.nextInt();
-		model.startPos = new Point();
-		model.startPos.x = in.nextInt();
-		model.startPos.y = in.nextInt();
+		model.X0 = model.X = in.nextInt();
+		model.Y0 = model.Y = in.nextInt();
 		Log.debug("%d %d", model.W, model.H);
 		Log.debug("%d", model.N);
-		Log.debug("%d %d", model.startPos.x, model.startPos.y);
+		Log.debug("%d %d", model.X0, model.Y0);
+		model.X_MIN = model.Y_MIN = 0;
+		model.X_MAX = model.W - 1;
+		model.Y_MAX = model.H - 1;
 		return model;
 	}
 
 	static Model turn(Scanner in, Model model) {
 		Log.debug("TURN =======================");
-		model.bombDir = Model.Direction.valueOf(in.next());
+		model.bombDir = in.next();
 		Log.debug("%s", model.bombDir);
 		return model;
 	}
 
 	static void play(Model model) {
-		System.out.println(String.format("%d %d", model.nextJump.x, model.nextJump.y));
+		System.out.println(String.format("%d %d", model.X, model.Y));
 	}
 }
 
@@ -78,8 +86,4 @@ class Log {
 	static void debug(String pattern, Object... values) {
 		System.err.println(String.format(pattern, values));
 	}
-}
-
-class Point {
-	int x, y;
 }
