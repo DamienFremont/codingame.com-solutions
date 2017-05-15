@@ -15,7 +15,7 @@ class Player {
 class Model {
     int nbFloors, width, nbRounds, exitFloor, exitPos;
     int nbTotalClones, nbAdditionalElevators /* , nbElevators */;
-    Elevator[] elevators;
+    int[] elevators;
 
     int cloneFloor, clonePos;
     String direction;
@@ -36,7 +36,7 @@ class Bot {
 	} else if (m.cloneFloor == m.exitFloor) {
 	    diff(m, m.exitPos);
 	} else {
-	    int elvPos = m.elevators[m.cloneFloor].pos;
+	    int elvPos = m.elevators[m.cloneFloor];
 	    diff(m, elvPos);
 	}
 	Log.debug("SOLUTION: %s", m.nextAction);
@@ -50,6 +50,7 @@ class Bot {
 	    nextDirection = "LEFT";
 	else if (diff == -1)
 	    nextDirection = "RIGHT";
+	Log.debug("clone=%d, next=%d, nexDir=%s", m.clonePos, nextPos, nextDirection);
 	if ("LEFT".equals(nextDirection) && !nextDirection.equals(m.direction)) {
 	    m.nextAction = "BLOCK";
 	}
@@ -73,12 +74,11 @@ class Game {
 	int nbElevators = in.nextInt();
 	Log.debug("%d %d %d %d %d %d %d %d", m.nbFloors, m.width, m.nbRounds, m.exitFloor, m.exitPos, m.nbTotalClones,
 	        m.nbAdditionalElevators, nbElevators);
-	m.elevators = new Model.Elevator[nbElevators];
+	m.elevators = new int[nbElevators];
 	for (int i = 0; i < nbElevators; i++) {
-	    m.elevators[i] = new Model.Elevator();
-	    m.elevators[i].floor = in.nextInt();
-	    m.elevators[i].pos = in.nextInt();
-	    Log.debug("%d %d", m.elevators[i].floor, m.elevators[i].pos);
+	    int floor = in.nextInt();
+	    m.elevators[floor] = in.nextInt();
+	    Log.debug("%d %d", floor, m.elevators[floor]);
 	}
 	return m;
     }
