@@ -9,6 +9,7 @@ https://www.codingame.com/
 ## PRACTICE
 
 ### CLASSIC PUZZLE - MEDIUM
+- [Don't Panic](projects/training-medium-don_t_panic_episode_1)
 - [Shadows of the Knight - Episode 1](projects/training-medium-shadows_of_the_knight_episode_1)
 - [Skynet Revolution - Episode 1](projects/training-medium-skynet_revolution_episode_1)
 - [There is no Spoon - Episode 1](projects/training-medium-there_is_no_spoon_episode_1)
@@ -36,5 +37,6 @@ https://www.codingame.com/
 - [Coders Strike Back](projects/multiplayer-bot_programming-coders_strike_back)
 
 ### CODE GOLF
+- [Don't Panic](projects/multiplayer-codegolf-don_t_panic)
 - [Temperatures](projects/multiplayer-codegolf-temperatures)
 - [Power of Thor](projects/multiplayer-codegolf-power_of_thor)
