@@ -1,38 +1,85 @@
-import java.util.*;
-import java.io.*;
-import java.math.*;
+import java.util.Scanner;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 class Player {
-
     public static void main(String args[]) {
-        Scanner in = new Scanner(System.in);
-        int nbFloors = in.nextInt(); // number of floors
-        int width = in.nextInt(); // width of the area
-        int nbRounds = in.nextInt(); // maximum number of rounds
-        int exitFloor = in.nextInt(); // floor on which the exit is found
-        int exitPos = in.nextInt(); // position of the exit on its floor
-        int nbTotalClones = in.nextInt(); // number of generated clones
-        int nbAdditionalElevators = in.nextInt(); // ignore (always zero)
-        int nbElevators = in.nextInt(); // number of elevators
-        for (int i = 0; i < nbElevators; i++) {
-            int elevatorFloor = in.nextInt(); // floor on which this elevator is found
-            int elevatorPos = in.nextInt(); // position of the elevator on its floor
-        }
+	Scanner in = new Scanner(System.in);
+	Model model = Game.init(in);
+	while (in.hasNext()) {
+	    model = Game.turn(in, model);
+	    model = Bot.solve(model);
+	    Game.play(model);
+	}
+    }
+}
 
-        // game loop
-        while (true) {
-            int cloneFloor = in.nextInt(); // floor of the leading clone
-            int clonePos = in.nextInt(); // position of the leading clone on its floor
-            String direction = in.next(); // direction of the leading clone: LEFT or RIGHT
+class Model {
+    int nbFloors, width, nbRounds, exitFloor, exitPos;
+    int nbTotalClones, nbAdditionalElevators /* , nbElevators */;
+    Elevator[] elevators;
 
-            // Write an action using System.out.println()
-            // To debug: System.err.println("Debug messages...");
+    int cloneFloor, clonePos;
+    String direction;
 
-            System.out.println("WAIT"); // action: WAIT or BLOCK
-        }
+    String nextAction;
+    
+    static class Elevator {
+	int floor, pos;
+    }
+}
+
+class Bot {
+    static Model solve(Model m) {
+	Log.debug("SOLVE =======================");
+	m.nextAction = "WAIT";
+	if("RIGHT".equals(m.direction)) {
+	    m.nextAction = "BLOCK";
+	}
+	Log.debug("SOLUTION: ");
+	return m;
+    }
+}
+
+class Game {
+    static Model init(Scanner in) {
+	Log.debug("INIT =======================");
+	Model m = new Model();
+	m.nbFloors = in.nextInt();
+	m.width = in.nextInt();
+	m.nbRounds = in.nextInt();
+	m.exitFloor = in.nextInt();
+	m.exitPos = in.nextInt();
+	m.nbTotalClones = in.nextInt();
+	m.nbAdditionalElevators = in.nextInt();
+	int nbElevators = in.nextInt();
+	Log.debug("%d %d %d %d %d %d %d %d", m.nbFloors, m.width, m.nbRounds, m.exitFloor, m.exitPos, m.nbTotalClones,
+	        m.nbAdditionalElevators, nbElevators);
+	m.elevators = new Model.Elevator[nbElevators];
+	for (int i = 0; i < nbElevators; i++) {
+	    m.elevators[i].floor = in.nextInt();
+	    m.elevators[i].pos = in.nextInt();
+	    Log.debug("%d %d", m.elevators[i].floor, m.elevators[i].pos);
+	}
+	return m;
+    }
+
+    static Model turn(Scanner in, Model m) {
+	Log.debug("TURN =======================");
+	m.cloneFloor = in.nextInt();
+	m.clonePos = in.nextInt();
+	m.direction = in.next();
+	Log.debug("%d %d %s", m.cloneFloor, m.clonePos, m.direction);
+	return m;
+    }
+
+    static void play(Model m) {
+	System.out.println(m.nextAction);
+    }
+}
+
+// UTILS
+
+class Log {
+    static void debug(String pattern, Object... values) {
+	System.err.println(String.format(pattern, values));
     }
 }
