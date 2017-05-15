@@ -44,8 +44,16 @@ class Bot {
     }
 
     private static void diff(Model m, int nextPos) {
-	String nextDirection = Integer.compare(m.clonePos, nextPos) == 1 ? "LEFT" : "RIGHT";
-	if (!nextDirection.equals(m.direction)) {
+	int diff = Integer.compare(m.clonePos, nextPos);
+	String nextDirection = null;
+	if (diff == 1)
+	    nextDirection = "LEFT";
+	else if (diff == -1)
+	    nextDirection = "RIGHT";
+	if ("LEFT".equals(nextDirection) && !nextDirection.equals(m.direction)) {
+	    m.nextAction = "BLOCK";
+	}
+	if ("RIGHT".equals(nextDirection) && !nextDirection.equals(m.direction)) {
 	    m.nextAction = "BLOCK";
 	}
     }
