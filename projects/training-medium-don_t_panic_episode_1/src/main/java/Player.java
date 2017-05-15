@@ -21,7 +21,7 @@ class Model {
     String direction;
 
     String nextAction;
-    
+
     static class Elevator {
 	int floor, pos;
     }
@@ -31,11 +31,23 @@ class Bot {
     static Model solve(Model m) {
 	Log.debug("SOLVE =======================");
 	m.nextAction = "WAIT";
-	if("RIGHT".equals(m.direction)) {
+	if (m.clonePos == -1) {
+	    // do nothing
+	} else if (m.cloneFloor == m.exitFloor) {
+	    diff(m, m.exitPos);
+	} else {
+	    int elvPos = m.elevators[m.cloneFloor].pos;
+	    diff(m, elvPos);
+	}
+	Log.debug("SOLUTION: %s", m.nextAction);
+	return m;
+    }
+
+    private static void diff(Model m, int nextPos) {
+	String nextDirection = Integer.compare(m.clonePos, nextPos) == 1 ? "LEFT" : "RIGHT";
+	if (!nextDirection.equals(m.direction)) {
 	    m.nextAction = "BLOCK";
 	}
-	Log.debug("SOLUTION: ");
-	return m;
     }
 }
 
@@ -55,6 +67,7 @@ class Game {
 	        m.nbAdditionalElevators, nbElevators);
 	m.elevators = new Model.Elevator[nbElevators];
 	for (int i = 0; i < nbElevators; i++) {
+	    m.elevators[i] = new Model.Elevator();
 	    m.elevators[i].floor = in.nextInt();
 	    m.elevators[i].pos = in.nextInt();
 	    Log.debug("%d %d", m.elevators[i].floor, m.elevators[i].pos);

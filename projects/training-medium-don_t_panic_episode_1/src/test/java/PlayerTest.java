@@ -7,4 +7,8 @@ public class PlayerTest {
 	TestCase.execute("01", () -> Player.main(null));
     }
 
+    @Test
+    public void test_case_02() {
+	TestCase.execute("02", () -> Player.main(null));
+    }
 }
