@@ -16,6 +16,7 @@ class Model {
 	List<String> p1Deck, p2Deck;
 
 	static String[] VALUES = { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
+	List<String> war;
 
 	int winner;
 	int round;
@@ -24,18 +25,17 @@ class Model {
 class Bot {
 	static Model solve(Model m) {
 		Log.debug("SOLVE =======================");
-		List<String> war = new ArrayList<>();
+		m.war = new ArrayList<>();
 		m.round = 0;
 		while (!m.p1Deck.isEmpty() && !m.p2Deck.isEmpty()) {
 			turn(m);
-			int fightScore = fight(m.p1Deck, m.p2Deck, war);
-			if (fightScore == 1) {
-				finish(1, m.p1Deck, war);
-			} else if (fightScore == -1) {
-				finish(2, m.p2Deck, war);
-			} else if (fightScore == 0) {
-				Log.debug("Step 2 : war");
-				// TODO
+			int score = fight(m.p1Deck, m.p2Deck, m.war);
+			if (score == 1) {
+				addCardsToBottom(1, m.p1Deck, m.war);
+			} else if (score == -1) {
+				addCardsToBottom(2, m.p2Deck, m.war);
+			} else if (score == 0) {
+				war(m.p1Deck, m.p2Deck, m.war);
 			} else {
 				throw new RuntimeException();
 			}
@@ -45,14 +45,36 @@ class Bot {
 		return m;
 	}
 
+	private static void war(List<String> p1Deck, List<String> p2Deck, List<String> war) {
+		Log.debug("    Step 2 : war");
+		war.add(removeTopCardFrom(p1Deck));
+		war.add(removeTopCardFrom(p1Deck));
+		war.add(removeTopCardFrom(p1Deck));
+		war.add(removeTopCardFrom(p2Deck));
+		war.add(removeTopCardFrom(p2Deck));
+		war.add(removeTopCardFrom(p2Deck));
+		int score = fight(p1Deck, p2Deck, war);
+		if (score == 1) {
+			addCardsToBottom(1, p1Deck, war);
+		} else if (score == -1) {
+			addCardsToBottom(2, p2Deck, war);
+		} else if (score == 0) {
+			// TODO
+			throw new RuntimeException();
+		} else {
+			throw new RuntimeException();
+		}
+	}
+
 	private static void turn(Model m) {
 		m.round++;
 		Log.debug("Game turn %d", m.round);
 		Log.debug("  Player 1 : %s", m.p1Deck);
 		Log.debug("  Player 2 : %s", m.p2Deck);
+		Log.debug("  War : %s", m.war);
 	}
 
-	private static void finish(int i, List<String> deck, List<String> war) {
+	private static void addCardsToBottom(int i, List<String> deck, List<String> war) {
 		Log.debug("  Winner : Player %d", 1);
 		deck.addAll(war);
 		war.clear();

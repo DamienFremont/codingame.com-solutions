@@ -16,5 +16,9 @@ public class PlayerTest {
 	public void test_case_03() {
 		TestCase.execute("03", () -> Solution.main(new String[]{"-debug"}));
 	}
+	@Test
+	public void test_case_04() {
+		TestCase.execute("04", () -> Solution.main(new String[]{"-debug"}));
+	}
 
 }
