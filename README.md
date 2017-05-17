@@ -5,10 +5,12 @@ https://www.codingame.com/
 
 ![alt text](screenshots/fiche_codingame_logo.png)
 
+---
 
 ## PRACTICE
 
 ### CLASSIC PUZZLE - MEDIUM
+- [War](training-medium-war)
 - [Don't Panic](training-medium-don_t_panic_episode_1)
 - [Shadows of the Knight - Episode 1](training-medium-shadows_of_the_knight_episode_1)
 - [Skynet Revolution - Episode 1](training-medium-skynet_revolution_episode_1)
@@ -26,6 +28,7 @@ https://www.codingame.com/
 - [The Descent](training-easy-the_descent)
 - [Onboarding](training-easy-onboarding)
 
+---
 
 ## COMPETE
 
