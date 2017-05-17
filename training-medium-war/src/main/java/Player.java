@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 class Solution {
 	public static void main(String args[]) {
+		Env.read(args);
 		Scanner in = new Scanner(System.in);
 		Model model = Game.init(in);
 		model = Bot.solve(model);
@@ -41,7 +42,6 @@ class Bot {
 		}
 		m.winner = m.p2Deck.isEmpty() ? 1 : 2;
 		Log.debug("Winner : Player %d", m.winner);
-		Log.debug("SOLUTION %d %d", m.winner, m.round);
 		return m;
 	}
 
@@ -94,16 +94,18 @@ class Game {
 
 	private static List<String> initDeck(Scanner in, int size) {
 		List<String> deck = new ArrayList<>();
-		Log.debug("%d", size);
+		Log.info("%d", size);
 		for (int i = 0; i < size; i++) {
 			String card = in.next();
 			deck.add(card);
-			Log.debug("%s", card);
+			Log.info("%s", card);
 		}
 		return deck;
 	}
 
 	static void play(Model m) {
+		Log.debug("PLAY =======================");
+		Log.debug("SOLUTION %d %d", m.winner, m.round);
 		System.out.println(String.format("%s %s", m.winner, m.round));
 	}
 }
@@ -111,7 +113,32 @@ class Game {
 // UTILS
 
 class Log {
+	static boolean Level_DEBUG;
+
+	static void info(String pattern, Object... values) {
+		log(pattern, values);
+	}
+
 	static void debug(String pattern, Object... values) {
+		if (!Level_DEBUG)
+			return;
+		log(pattern, values);
+	}
+
+	private static void log(String pattern, Object... values) {
 		System.err.println(String.format(pattern, values));
+	}
+}
+
+class Env {
+
+	static void read(String args[]) {
+		Log.Level_DEBUG = false;
+		if (args == null)
+			return;
+		for (String arg : args) {
+			if ("-debug".equals(arg))
+				Log.Level_DEBUG = true;
+		}
 	}
 }
