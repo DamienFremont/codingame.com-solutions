@@ -27,43 +27,52 @@ class Bot {
 		Log.debug("SOLVE =======================");
 		m.war = new ArrayList<>();
 		m.round = 0;
-		while (!m.p1Deck.isEmpty() && !m.p2Deck.isEmpty()) {
+		boolean pat = false;
+		while (!m.p1Deck.isEmpty() && !m.p2Deck.isEmpty() && !pat) {
 			turn(m);
-			int score = fight(m.p1Deck, m.p2Deck, m.war);
-			if (score == 1) {
-				addCardsToBottom(1, m.p1Deck, m.war);
-			} else if (score == -1) {
-				addCardsToBottom(2, m.p2Deck, m.war);
-			} else if (score == 0) {
-				war(m.p1Deck, m.p2Deck, m.war);
-			} else {
-				throw new RuntimeException();
-			}
+			pat = steps(m.p1Deck, m.p2Deck, m.war);
 		}
-		m.winner = m.p2Deck.isEmpty() ? 1 : 2;
+		int winner = pat ? 0 : (m.p2Deck.size() < m.p1Deck.size() ? 1 : 2);
+		m.winner = winner;
 		Log.debug("Winner : Player %d", m.winner);
 		return m;
 	}
 
-	private static void war(List<String> p1Deck, List<String> p2Deck, List<String> war) {
-		Log.debug("    Step 2 : war");
-		war.add(removeTopCardFrom(p1Deck));
-		war.add(removeTopCardFrom(p1Deck));
-		war.add(removeTopCardFrom(p1Deck));
-		war.add(removeTopCardFrom(p2Deck));
-		war.add(removeTopCardFrom(p2Deck));
-		war.add(removeTopCardFrom(p2Deck));
-		int score = fight(p1Deck, p2Deck, war);
-		if (score == 1) {
-			addCardsToBottom(1, p1Deck, war);
-		} else if (score == -1) {
-			addCardsToBottom(2, p2Deck, war);
-		} else if (score == 0) {
-			// TODO
-			throw new RuntimeException();
+	private static boolean specialCaseRunsOutOfCards(List<String> p1Deck, List<String> p2Deck) {
+		return !(p1Deck.size() > 3 && p2Deck.size() > 3);
+	}
+
+	private static boolean war(List<String> p1Deck, List<String> p2Deck, List<String> war) {
+		boolean pat = false;
+		if (specialCaseRunsOutOfCards(p1Deck, p2Deck)) {
+			Log.debug("    Step 2 : war %s", "PAT!");
+			pat = true;
 		} else {
-			throw new RuntimeException();
+			war.add(removeTopCardFrom(p1Deck));
+			war.add(removeTopCardFrom(p1Deck));
+			war.add(removeTopCardFrom(p1Deck));
+			war.add(removeTopCardFrom(p2Deck));
+			war.add(removeTopCardFrom(p2Deck));
+			war.add(removeTopCardFrom(p2Deck));
+			Log.debug("    Step 2 : war %s", war);
+			pat = steps(p1Deck, p2Deck, war);
 		}
+		return pat;
+	}
+
+	private static boolean steps(List<String> p1Deck, List<String> p2Deck, List<String> war) {
+		boolean pat = false;
+		int win = battle(p1Deck, p2Deck, war);
+		if (win != 0) {
+			if (win == 1) {
+				addCardsToBottom(1, p1Deck, war);
+			} else {
+				addCardsToBottom(2, p2Deck, war);
+			}
+		} else {
+			pat = war(p1Deck, p2Deck, war);
+		}
+		return pat;
 	}
 
 	private static void turn(Model m) {
@@ -71,16 +80,15 @@ class Bot {
 		Log.debug("Game turn %d", m.round);
 		Log.debug("  Player 1 : %s", m.p1Deck);
 		Log.debug("  Player 2 : %s", m.p2Deck);
-		Log.debug("  War : %s", m.war);
 	}
 
 	private static void addCardsToBottom(int i, List<String> deck, List<String> war) {
-		Log.debug("  Winner : Player %d", 1);
+		Log.debug("  Winner : Player %d", i);
 		deck.addAll(war);
 		war.clear();
 	}
 
-	private static int fight(List<String> p1Deck, List<String> p2Deck, List<String> warDeck) {
+	private static int battle(List<String> p1Deck, List<String> p2Deck, List<String> warDeck) {
 		String p1Card = removeTopCardFrom(p1Deck);
 		String p2Card = removeTopCardFrom(p2Deck);
 		warDeck.add(p1Card);
@@ -128,7 +136,7 @@ class Game {
 	static void play(Model m) {
 		Log.debug("PLAY =======================");
 		Log.debug("SOLUTION %d %d", m.winner, m.round);
-		System.out.println(String.format("%s %s", m.winner, m.round));
+		System.out.println(m.winner == 0 ? "PAT" : String.format("%s %s", m.winner, m.round));
 	}
 }
 
