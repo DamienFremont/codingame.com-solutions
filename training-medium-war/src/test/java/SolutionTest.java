@@ -1,6 +1,6 @@
 import org.junit.Test;
 
-public class PlayerTest {
+public class SolutionTest {
 
 	@Test
 	public void test_case_01() {
