@@ -7,4 +7,9 @@ public class PlayerTest {
 		TestCase.execute("01", () -> Player.main(new String[] { "-debug" }));
 	}
 
+	@Test
+	public void test_case_02() {
+		TestCase.execute("02", () -> Player.main(new String[] { "-debug" }));
+	}
+
 }

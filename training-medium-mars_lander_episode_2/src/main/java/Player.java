@@ -1,8 +1,11 @@
+
 import java.util.Scanner;
 
 class Player {
 	public static void main(String args[]) {
 		Env.read(args);
+		Log.Level_DEBUG = true;
+
 		Scanner in = new Scanner(System.in);
 		Model model = Game.init(in);
 		while (in.hasNext()) {
@@ -18,15 +21,20 @@ class Model {
 
 	int X, Y, hSpeed, vSpeed, fuel, rotate, power;
 
+	static enum Phase {
+		LAUNCH, FLIP, ENTRY, GUIDANCE, LANDING
+	}
+
 	static int[][] PHASES = new int[][] {
 			// X%, Y%, hSpeed, vSpeed, fuel, rotate, power
-			{ -1, 9999, 99, 99, 0, 90, 4 }, // LAUNCH
-			{ -1, 2500, 40, 30, 0, 30, 4 }, // FLIP MANEUVER
-			{ 1000, 2000, 20, 20, 0, 22, 4 }, // ENTRY BURN
-			{ 500, 1500, 10, 10, 0, 10, 4 }, // AERODYNAMIC GUIDANCE
-			{ 0, 500, 0, 0, 0, 0, 4 } // VERSTICAL LANDING
+			{ 9999, 9999, 99, 99, 0, 10, 4 }, // LAUNCH
+			{ 1000, 9999, 40, 60, 0, 45, 2 }, // FLIP MANEUVER
+			{ 800, 2600, 20, 40, 0, 22, 4 }, // ENTRY BURN
+			{ 300, 2000, 10, 30, 0, 10, 4 }, // AERODYNAMIC GUIDANCE
+			{ 200, 500, 10, 20, 0, 0, 4 } // VERSTICAL LANDING
 	};
 
+	Point target;
 	int outputRotate, outputPower;
 }
 
@@ -36,39 +44,44 @@ class Bot {
 		int rotate = -1;
 		Log.debug("SOLVE =======================");
 		Point[] flatGround = findFlatGround(m.groundPoints);
-		Point target = computeTarget(flatGround);
+		m.target = computeTarget(flatGround);
 
-		int iPhase = findPhaseByY(m);
+		int iPhase = getPhase(m);
 		int[] phase = Model.PHASES[iPhase];
-		Log.info("phase=%d", iPhase);
+		Model.Phase phaseKey = Model.Phase.values()[iPhase];
+		Log.info("phase=%d (%s)", iPhase, phaseKey);
+
 		int phase_x = phase[0];
 		int phase_hSpeed = phase[2];
 		int phase_vSpeed = phase[3];
 		int phase_rotate = phase[5];
 		int phase_power = phase[6];
 
-		if (iPhase == 0) {
-			power = phase_power;
-			rotate = -phase_rotate;
-		} else if (iPhase == 1) {
-			power = phase_power;
-			rotate = phase_rotate;
-		} else {
-			int distance = target.y - m.X;
-			boolean hToFast = m.hSpeed > phase_hSpeed;
-			boolean vToFast = m.vSpeed > phase_vSpeed;
-			if (distance < phase_x) {
-				if (m.X < target.x)
-					rotate = phase_rotate;
-				else
-					rotate = -phase_rotate;
-			} else {
-				rotate = phase_rotate;
-			}
+		boolean atRight = m.X < m.target.x;
+		boolean atLeft = m.X > m.target.x;
+		int goLeft = phase_rotate;
+		int goRight = -phase_rotate;
+		boolean goingLeft = m.hSpeed < 0;
+		boolean goingRight = m.hSpeed > 0;
 
-			int powerV = (m.vSpeed < -phase_vSpeed) ? phase_power / 2 : 0;
-			int powerH = phase_power / 2;
-			power = (powerV == 0) ? phase_power : (powerV + powerH);
+		int distance = Math.abs(m.target.x - m.X);
+		Log.debug("isRight=%b", atRight);
+		Log.debug("distance %d", distance);
+
+		if (phaseKey == Model.Phase.LAUNCH) {
+			power = m.vSpeed > 0 ? 0 : limitedHSpeed(m, phase);
+			rotate = atRight ? goRight : goLeft;
+		} else if (phaseKey == Model.Phase.FLIP) {
+			power = limitedHSpeed(m, phase);
+			rotate = atRight ? goLeft : goRight;
+		} else if (phaseKey == Model.Phase.ENTRY) {
+			Log.debug("diff=%d", distance);
+			power = farAway(phase_x, distance) ? //
+					proportionSpeed(phase, distance) : limitedSpeed(m, phase);
+			rotate = adjust(m, phase_rotate);
+		} else {
+			rotate = adjust(m, phase_rotate);
+			power = limitedSpeed(m, phase);
 		}
 
 		Preconditions.check(power != -1);
@@ -80,12 +93,71 @@ class Bot {
 		return m;
 	}
 
-	private static int findPhaseByY(Model m) {
+	private static boolean farAway(int phase_x, int distance) {
+		return distance > phase_x;
+	}
+
+	private static int adjust(Model m, int phase_rotate) {
+		boolean atRight = m.X < m.target.x;
+		boolean atLeft = m.X > m.target.x;
+		int goLeft = phase_rotate;
+		int goRight = -phase_rotate;
+		boolean goingLeft = m.hSpeed < 0;
+		boolean goingRight = m.hSpeed > 0;
+
+		int rotate;
+		rotate = 0;
+		if (atRight && goingRight)
+			rotate = 0;
+		if (atRight && goingLeft)
+			rotate = goRight;
+		if (atLeft && goingLeft)
+			rotate = 0;
+		if (atLeft && goingRight)
+			rotate = goLeft;
+		return rotate;
+	}
+
+	private static int proportionSpeed(int[] phase, int distance) {
+		int phase_x = phase[0];
+		int phase_hSpeed = phase[2];
+		int phase_vSpeed = phase[3];
+		int phase_rotate = phase[5];
+		int phase_power = phase[6];
+		return Math.abs((phase_x / distance) * phase_power);
+	}
+
+	private static int limitedSpeed(Model m, int[] phase) {
+		int phase_x = phase[0];
+		int phase_hSpeed = phase[2];
+		int phase_vSpeed = phase[3];
+		int phase_rotate = phase[5];
+		int phase_power = phase[6];
+		return (m.vSpeed > -phase_vSpeed) ? phase_power / 2 : phase_power;
+	}
+
+	private static int limitedHSpeed(Model m, int[] phase) {
+		int phase_x = phase[0];
+		int phase_hSpeed = phase[2];
+		int phase_vSpeed = phase[3];
+		int phase_rotate = phase[5];
+		int phase_power = phase[6];
+		return (Math.abs(m.hSpeed) > phase_hSpeed) ? phase_power / 2 : phase_power;
+	}
+
+	private static boolean isPhase(Model.Phase e, Model m) {
+		int i = e.ordinal();
+		int[] phase = Model.PHASES[i];
+		int phase_x = phase[0];
+		int phase_y = phase[1];
+		int distance = Math.abs(m.target.x - m.X);
+		return (m.Y < phase_y && distance < phase_x);
+	}
+
+	private static int getPhase(Model m) {
 		int iPhase = -1;
 		for (int i = 0; i < Model.PHASES.length; i++) {
-			int[] phase = Model.PHASES[i];
-			int phase_y = phase[1];
-			if (m.Y < phase_y) {
+			if (isPhase(Model.Phase.values()[i], m)) {
 				iPhase = i;
 			}
 		}
