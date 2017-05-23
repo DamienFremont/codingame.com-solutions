@@ -10,6 +10,8 @@ https://www.codingame.com/
 ## PRACTICE
 
 ### CLASSIC PUZZLE - MEDIUM
+- [Stock Exchange Losses](training-medium-stock_exchange_losses)
+- [Mars Lander - Episode 2](training-medium-mars_lander_episode_2)
 - [War](training-medium-war)
 - [Don't Panic](training-medium-don_t_panic_episode_1)
 - [Shadows of the Knight - Episode 1](training-medium-shadows_of_the_knight_episode_1)
