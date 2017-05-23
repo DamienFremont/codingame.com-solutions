@@ -47,42 +47,37 @@ class Bot {
 		double y0targetDist = Math.abs(y0 - m.target.y);
 
 		Model.Phase phase;
-		double xv, yv;
+		Vector v1;
 		if (Math.abs(v0.x) > 70) {
 			phase = Model.Phase.FLIP;
 			double x0dir = Math.signum(v0.x);
-			yv = 0;
-			xv = (-x0dir * 2);
+			v1 = new Vector(-x0dir * 2, 0);
 		} else if (x10distAbs > 500 && y0targetDist > 100) {
 			phase = Model.Phase.ENTRY;
-			yv = 0;
-			xv = (x10dir * 2);
+			v1 = new Vector(x10dir * 2, 0);
 		} else if (y0targetDist > 100) {
 			phase = Model.Phase.GUIDANCE;
-			yv = -30;
-			xv = (x10dir * 2);
+			v1 = new Vector(x10dir * 2, -30);
 		} else {
 			phase = Model.Phase.LANDING;
-			xv = 0;
-			yv = -30;
+			v1 = new Vector(0, -30);
 		}
-		Vector v1 = new Vector(xv, yv);
 
-		m = mapShipCommand(m, v0, vG, yv, v1);
+		m = mapShipCommand(m, v0, vG, v1);
 
 		Log.info("phase=%s", phase);
 		Log.debug("dist x,y %d,%d", toInt(x10distAbs), toInt(y0targetDist));
 		Log.debug("t+10 x(t), y(t)= %d,%d", toInt(x10), toInt(y10));
-		Log.debug("xv,yv: %d, %d", toInt(xv), toInt(yv));
+		Log.debug("xv,yv: %d, %d", toInt(v1.x), toInt(v1.y));
 		return m;
 	}
 
-	private static Model mapShipCommand(Model m, Vector v0, Vector vG, double yv, Vector v1) {
+	private static Model mapShipCommand(Model m, Vector v0, Vector vG, Vector v1) {
 		int power = -1;
 		int rotate = -1;
 		double angle = Trajectory.angle(v1.x + vG.x, v1.y + vG.y);
 		if (-90 < angle && angle < 90) {
-			power = (0 < v0.y && v0.y < yv) ? 0 : 4;
+			power = (0 < v0.y && v0.y < v1.y) ? 0 : 4;
 			rotate = toInt(-angle);
 		} else {
 			rotate = 0;
