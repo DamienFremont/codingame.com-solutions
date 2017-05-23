@@ -22,17 +22,8 @@ class Model {
 	int X, Y, hSpeed, vSpeed, fuel, rotate, power;
 
 	static enum Phase {
-		LAUNCH, FLIP, ENTRY, GUIDANCE, LANDING
+		FLIP, ENTRY, GUIDANCE, LANDING
 	}
-
-	static int[][] PHASES = new int[][] {
-			// X%, Y%, hSpeed, vSpeed, fuel, rotate, power
-			{ 9999, 9999, 99, 99, 0, 10, 4 }, // LAUNCH
-			{ 1000, 9999, 40, 60, 0, 45, 2 }, // FLIP MANEUVER
-			{ 800, 2600, 20, 40, 0, 22, 4 }, // ENTRY BURN
-			{ 300, 2000, 10, 30, 0, 10, 4 }, // AERODYNAMIC GUIDANCE
-			{ 200, 500, 10, 20, 0, 0, 4 } // VERSTICAL LANDING
-	};
 
 	Point target;
 	int outputRotate, outputPower;
@@ -40,58 +31,59 @@ class Model {
 
 class Bot {
 	static Model solve(Model m) {
-		int power = -1;
-		int rotate = -1;
 		Log.debug("SOLVE =======================");
-		Point[] flatGround = findFlatGround(m.groundPoints);
-		m.target = computeTarget(flatGround);
-		int iPhase = getPhase(m);
-		int[] phase = Model.PHASES[iPhase];
-		Model.Phase phaseKey = Model.Phase.values()[iPhase];
-		Log.info("phase=%d (%s)", iPhase, phaseKey);
+		Point[] flatGround = flatGround(m.groundPoints);
+		m.target = target(flatGround);
 
-		// T+10
-		int t = 20;
+		int t = 20; // FUTUR
 		int x0 = m.X, y0 = m.Y;
-
 		Vector v0 = new Vector(m.hSpeed, m.vSpeed);
 		Vector vG = new Vector(0, 3.711);
-
 		double x10 = Trajectory.x_t(t, x0, v0.x);
 		double y10 = Trajectory.y_t(t, y0, v0.y);
-
-		double xv, yv;
 		double x10dist = m.target.x - x10;
 		double x10dir = Math.signum(x10dist);
 		double x10distAbs = Math.abs(x10dist);
 		double y0targetDist = Math.abs(y0 - m.target.y);
 
+		Model.Phase phase;
+		double xv, yv;
 		if (Math.abs(v0.x) > 70) {
+			phase = Model.Phase.FLIP;
+			double x0dir = Math.signum(v0.x);
 			yv = 0;
-			double x0dir = Math.signum(y0 - m.target.y);
-			xv = (x0dir * 2);
-		} else if (x10distAbs > 500) {
-			// ENTRY PHASE
+			xv = (-x0dir * 2);
+		} else if (x10distAbs > 500 && y0targetDist > 100) {
+			phase = Model.Phase.ENTRY;
 			yv = 0;
 			xv = (x10dir * 2);
-		} else {
-			// GUIDANCE PHASE
+		} else if (y0targetDist > 100) {
+			phase = Model.Phase.GUIDANCE;
 			yv = -30;
 			xv = (x10dir * 2);
+		} else {
+			phase = Model.Phase.LANDING;
+			xv = 0;
+			yv = -30;
 		}
-
 		Vector v1 = new Vector(xv, yv);
 
-		double theta = Trajectory.angle(v1.x + vG.x, v1.y + vG.y);
+		m = mapShipCommand(m, v0, vG, yv, v1);
 
+		Log.info("phase=%s", phase);
 		Log.debug("dist x,y %d,%d", toInt(x10distAbs), toInt(y0targetDist));
 		Log.debug("t+10 x(t), y(t)= %d,%d", toInt(x10), toInt(y10));
 		Log.debug("xv,yv: %d, %d", toInt(xv), toInt(yv));
-		Log.debug("a: %d°", toInt(theta));
+		return m;
+	}
 
-		if (-90 < theta && theta < 90) {
+	private static Model mapShipCommand(Model m, Vector v0, Vector vG, double yv, Vector v1) {
+		int power = -1;
+		int rotate = -1;
+		double angle = Trajectory.angle(v1.x + vG.x, v1.y + vG.y);
+		if (-90 < angle && angle < 90) {
 			power = (0 < v0.y && v0.y < yv) ? 0 : 4;
-			rotate = toInt(-theta);
+			rotate = toInt(-angle);
 		} else {
 			rotate = 0;
 			if (v0.y < -30)
@@ -99,10 +91,6 @@ class Bot {
 			else
 				power = 0;
 		}
-		// LANDING PHASE
-		if (y0targetDist < 100)
-			rotate = 0;
-
 		Preconditions.check(0 <= power && power <= 4);
 		Preconditions.check(-90 <= rotate && rotate <= 90);
 		m.outputPower = power;
@@ -116,27 +104,7 @@ class Bot {
 		return i;
 	}
 
-	private static boolean isPhase(Model.Phase e, Model m) {
-		int i = e.ordinal();
-		int[] phase = Model.PHASES[i];
-		int phase_x = phase[0];
-		int phase_y = phase[1];
-		int distance = Math.abs(m.target.x - m.X);
-		return (m.Y < phase_y && distance < phase_x);
-	}
-
-	private static int getPhase(Model m) {
-		int iPhase = -1;
-		for (int i = 0; i < Model.PHASES.length; i++) {
-			if (isPhase(Model.Phase.values()[i], m)) {
-				iPhase = i;
-			}
-		}
-		Preconditions.check(iPhase != -1);
-		return iPhase;
-	}
-
-	private static Point computeTarget(Point[] flatGround) {
+	private static Point target(Point[] flatGround) {
 		int x = flatGround[0].x;
 		int width = width(flatGround);
 		int y = flatGround[0].y;
@@ -149,7 +117,7 @@ class Bot {
 		return flatGround[1].x - flatGround[0].x;
 	}
 
-	private static Point[] findFlatGround(Point[] groundPoints) {
+	private static Point[] flatGround(Point[] groundPoints) {
 		Point[] flatGround = new Point[2];
 		for (int i = 0; i < groundPoints.length; i++) {
 			Point p1 = i > 0 ? groundPoints[i] : null;
@@ -263,14 +231,12 @@ class Trajectory {
 
 	static double x_t(int t, int x0, double v0) {
 		double x = x0 + v0 * t;
-		Log.debug("x(t) = x0 + v0 * t ...x(%d) = %d + %f * %d = %f", t, x0, v0, t, x);
 		return x;
 	}
 
 	static double y_t(int t, int y0, double v0) {
 		double g = 3.711;
 		double y = y0 + (v0 * t) + (0.5 * g) * Math.pow(t, 2);
-		Log.debug("y(t) = y0 + v0 * t + 0.5g * t² ...y(%d) = %d + %f * %d + 0.5(%f) * %d² = %f", t, y0, v0, t, g, t, y);
 		return y;
 	}
 
