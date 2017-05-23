@@ -22,4 +22,9 @@ public class PlayerTest {
 		TestCase.execute("04", () -> Player.main(new String[] { "-debug" }));
 	}
 
+	@Test
+	public void test_case_05() {
+		TestCase.execute("05", () -> Player.main(new String[] { "-debug" }));
+	}
+
 }

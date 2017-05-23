@@ -45,16 +45,17 @@ class Bot {
 		double x10dir = Math.signum(x10dist);
 		double x10distAbs = Math.abs(x10dist);
 		double y0targetDist = Math.abs(y0 - m.target.y);
+		double y10targetDist = Math.abs(m.target.y-y10);
 
 		Model.Phase phase;
 		Vector v1;
-		if (Math.abs(v0.x) > 70) {
+		if (Math.abs(v0.x) > 50) {
 			phase = Model.Phase.FLIP;
 			double x0dir = Math.signum(v0.x);
-			v1 = new Vector(-x0dir * 2, 0);
-		} else if (x10distAbs > 500 && y0targetDist > 100) {
+			v1 = new Vector(-x0dir * 2, y10targetDist<300 ? 300 :0);
+		} else if (x10distAbs > 100 && y0targetDist > 100) {
 			phase = Model.Phase.ENTRY;
-			v1 = new Vector(x10dir * 2, 0);
+			v1 = new Vector(x10dir * 2, y10targetDist<300 ? 300 :0);
 		} else if (y0targetDist > 100) {
 			phase = Model.Phase.GUIDANCE;
 			v1 = new Vector(x10dir * 2, -30);
