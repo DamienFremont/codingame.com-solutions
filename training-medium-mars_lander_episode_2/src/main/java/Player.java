@@ -68,7 +68,8 @@ class Bot {
 
 		if (Math.abs(v0.x) > 70) {
 			yv = 0;
-			xv = (-x10dir * 2);
+			double x0dir = Math.signum(y0 - m.target.y);
+			xv = (x0dir * 2);
 		} else if (x10distAbs > 500) {
 			// ENTRY PHASE
 			yv = 0;
