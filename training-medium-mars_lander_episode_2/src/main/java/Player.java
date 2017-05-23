@@ -45,104 +45,71 @@ class Bot {
 		Log.debug("SOLVE =======================");
 		Point[] flatGround = findFlatGround(m.groundPoints);
 		m.target = computeTarget(flatGround);
-
 		int iPhase = getPhase(m);
 		int[] phase = Model.PHASES[iPhase];
 		Model.Phase phaseKey = Model.Phase.values()[iPhase];
 		Log.info("phase=%d (%s)", iPhase, phaseKey);
 
-		int phase_x = phase[0];
-		int phase_hSpeed = phase[2];
-		int phase_vSpeed = phase[3];
-		int phase_rotate = phase[5];
-		int phase_power = phase[6];
+		// T+10
+		int t = 20;
+		int x0 = m.X, y0 = m.Y;
 
-		boolean atRight = m.X < m.target.x;
-		boolean atLeft = m.X > m.target.x;
-		int goLeft = phase_rotate;
-		int goRight = -phase_rotate;
-		boolean goingLeft = m.hSpeed < 0;
-		boolean goingRight = m.hSpeed > 0;
+		Vector v0 = new Vector(m.hSpeed, m.vSpeed);
+		Vector vG = new Vector(0, 3.711);
 
-		int distance = Math.abs(m.target.x - m.X);
-		Log.debug("isRight=%b", atRight);
-		Log.debug("distance %d", distance);
+		double x10 = Trajectory.x_t(t, x0, v0.x);
+		double y10 = Trajectory.y_t(t, y0, v0.y);
 
-		if (phaseKey == Model.Phase.LAUNCH) {
-			power = m.vSpeed > 0 ? 0 : limitedHSpeed(m, phase);
-			rotate = atRight ? goRight : goLeft;
-		} else if (phaseKey == Model.Phase.FLIP) {
-			power = limitedHSpeed(m, phase);
-			rotate = atRight ? goLeft : goRight;
-		} else if (phaseKey == Model.Phase.ENTRY) {
-			Log.debug("diff=%d", distance);
-			power = farAway(phase_x, distance) ? //
-					proportionSpeed(phase, distance) : limitedSpeed(m, phase);
-			rotate = adjust(m, phase_rotate);
+		double xv, yv;
+		double x10dist = m.target.x - x10;
+		double x10dir = Math.signum(x10dist);
+		double x10distAbs = Math.abs(x10dist);
+		double y0targetDist = Math.abs(y0 - m.target.y);
+
+		if (x10distAbs > 500) {
+			// ENTRY PHASE
+			yv = 0;
+			xv = (x10dir * 2);
 		} else {
-			rotate = adjust(m, phase_rotate);
-			power = limitedSpeed(m, phase);
+			// GUIDANCE PHASE
+			yv = -30;
+			xv = (x10dir * 2);
 		}
 
-		Preconditions.check(power != -1);
+		Vector v1 = new Vector(xv, yv);
+
+		double theta = Trajectory.angle(v1.x + vG.x, v1.y + vG.y);
+
+		Log.debug("dist x,y %d,%d", toInt(x10distAbs), toInt(y0targetDist));
+		Log.debug("t+10 x(t), y(t)= %d,%d", toInt(x10), toInt(y10));
+		Log.debug("xv,yv: %d, %d", toInt(xv), toInt(yv));
+		Log.debug("a: %d°", toInt(theta));
+
+		if (-90 < theta && theta < 90) {
+			power = (0 < v0.y && v0.y < yv) ? 0 : 4;
+			rotate = toInt(-theta);
+		} else {
+			rotate = 0;
+			if (v0.y < -30)
+				power = 4;
+			else
+				power = 0;
+		}
+		// LANDING PHASE
+		if (y0targetDist < 100)
+			rotate = 0;
+
 		Preconditions.check(0 <= power && power <= 4);
-		Preconditions.check(rotate != -1);
 		Preconditions.check(-90 <= rotate && rotate <= 90);
 		m.outputPower = power;
 		m.outputRotate = rotate;
 		return m;
 	}
 
-	private static boolean farAway(int phase_x, int distance) {
-		return distance > phase_x;
-	}
-
-	private static int adjust(Model m, int phase_rotate) {
-		boolean atRight = m.X < m.target.x;
-		boolean atLeft = m.X > m.target.x;
-		int goLeft = phase_rotate;
-		int goRight = -phase_rotate;
-		boolean goingLeft = m.hSpeed < 0;
-		boolean goingRight = m.hSpeed > 0;
-
-		int rotate;
-		rotate = 0;
-		if (atRight && goingRight)
-			rotate = 0;
-		if (atRight && goingLeft)
-			rotate = goRight;
-		if (atLeft && goingLeft)
-			rotate = 0;
-		if (atLeft && goingRight)
-			rotate = goLeft;
-		return rotate;
-	}
-
-	private static int proportionSpeed(int[] phase, int distance) {
-		int phase_x = phase[0];
-		int phase_hSpeed = phase[2];
-		int phase_vSpeed = phase[3];
-		int phase_rotate = phase[5];
-		int phase_power = phase[6];
-		return Math.abs((phase_x / distance) * phase_power);
-	}
-
-	private static int limitedSpeed(Model m, int[] phase) {
-		int phase_x = phase[0];
-		int phase_hSpeed = phase[2];
-		int phase_vSpeed = phase[3];
-		int phase_rotate = phase[5];
-		int phase_power = phase[6];
-		return (m.vSpeed > -phase_vSpeed) ? phase_power / 2 : phase_power;
-	}
-
-	private static int limitedHSpeed(Model m, int[] phase) {
-		int phase_x = phase[0];
-		int phase_hSpeed = phase[2];
-		int phase_vSpeed = phase[3];
-		int phase_rotate = phase[5];
-		int phase_power = phase[6];
-		return (Math.abs(m.hSpeed) > phase_hSpeed) ? phase_power / 2 : phase_power;
+	static int toInt(double dd) {
+		Double d = new Double(dd);
+		int i = d.intValue();
+		return i;
 	}
 
 	private static boolean isPhase(Model.Phase e, Model m) {
@@ -191,6 +158,7 @@ class Bot {
 		Log.debug("flatGround=[%d,%d][%d,%d]", flatGround[0].x, flatGround[0].y, flatGround[1].x, flatGround[1].y);
 		return flatGround;
 	}
+
 }
 
 class Game {
@@ -216,6 +184,7 @@ class Game {
 		m.fuel = in.nextInt();
 		m.rotate = in.nextInt();
 		m.power = in.nextInt();
+		Log.info("X Y hSpeed vSpeed fuel rotate power");
 		Log.info("%d %d %d %d %d %d %d", m.X, m.Y, m.hSpeed, m.vSpeed, m.fuel, m.rotate, m.power);
 		return m;
 	}
@@ -269,10 +238,44 @@ class Point {
 	}
 }
 
+class Vector {
+	double x, y;
+
+	public Vector(double x, double y) {
+		this.x = x;
+		this.y = y;
+	}
+}
+
 class Preconditions {
 
 	static void check(boolean condition) {
 		if (!condition)
 			throw new RuntimeException("CONDITION FALSE");
 	}
+}
+
+class Trajectory {
+
+	static double x_t(int t, int x0, double v0) {
+		double x = x0 + v0 * t;
+		Log.debug("x(t) = x0 + v0 * t ...x(%d) = %d + %f * %d = %f", t, x0, v0, t, x);
+		return x;
+	}
+
+	static double y_t(int t, int y0, double v0) {
+		double g = 3.711;
+		double y = y0 + (v0 * t) + (0.5 * g) * Math.pow(t, 2);
+		Log.debug("y(t) = y0 + v0 * t + 0.5g * t² ...y(%d) = %d + %f * %d + 0.5(%f) * %d² = %f", t, y0, v0, t, g, t, y);
+		return y;
+	}
+
+	static double angle(double x, double y) {
+		return Math.toDegrees(Math.atan2(x - 0, y - 0));
+	}
+
+	static double dist(double x1, double y1, double x2, double y2) {
+		return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+	}
+
 }
