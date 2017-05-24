@@ -5,24 +5,30 @@ class Solution {
 	public static void main(String args[]) {
 		Env.read(args);
 
+		Log.info("INIT =======================");
 		Scanner in = new Scanner(System.in);
-
 		int n = in.nextInt();
 		Log.info("%d", n);
+		int p, v, vMin, vMax;
 
-		int p = 0, p_tmp;
-		int i, j;
-		int[] v_array = new int[n];
-
-		for (i = 0; i < n; i++) {
-			v_array[i] = in.nextInt();
-			for (j = 0; j < i; j++) {
-				p_tmp = v_array[i] - v_array[j];
-				if (p_tmp < p)
-					p = p_tmp;
+		Log.info("SOLVE =======================");
+		p = 0;
+		v = vMin = vMax = in.nextInt();
+		Log.debug("for %d p=%d v[%d..%d]", v, p, vMin, vMax);
+		for (int i = 1; i < n; i++) {
+			v = in.nextInt();
+			if (v > vMax) {
+				vMin = vMax = v;
+			} else if (v < vMin) {
+				vMin = v;
+				int loss = vMin - vMax;
+				if (loss < p)
+					p = loss;
 			}
+			Log.debug("for %d p=%d v[%d..%d]", v, p, vMin, vMax);
 		}
 
+		Log.info("ANSWER =======================");
 		System.out.println(p);
 	}
 }

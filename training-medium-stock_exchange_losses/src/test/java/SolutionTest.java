@@ -2,7 +2,7 @@ import org.junit.Test;
 
 public class SolutionTest {
 
-	private static final int MAX = 3000;
+	private static final int MAX = 1000;
 
 	@Test(timeout = MAX)
 	public void test_case_01() {
@@ -26,7 +26,7 @@ public class SolutionTest {
 
 	@Test(timeout = MAX)
 	public void test_case_05() {
-		TestCase.execute("05", () -> Solution.main(new String[] { "-debug" }));
+		TestCase.execute("05", () -> Solution.main(new String[] {}));
 	}
 
 	@Test(timeout = MAX)
