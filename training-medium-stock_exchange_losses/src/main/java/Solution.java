@@ -6,46 +6,27 @@ class Solution {
 		Env.read(args);
 
 		Scanner in = new Scanner(System.in);
-		Model model = Game.init(in);
-		int[] vs = model.stockValues;
-		int v_loss_max = 0;
-		for (int i = 0; i < vs.length; i++) {
-			int v0 = vs[i];
-			Log.debug("for %d", v0);
-			for (int y = i + 1; y < vs.length; y++) {
-				int v1 = vs[y];
-				int v0v1_loss = v1 - v0;
-				Log.debug("  with %d diff=%d", v1, v0v1_loss);
-				if (v0v1_loss < v_loss_max)
-					v_loss_max = v0v1_loss;
+
+		int n = in.nextInt();
+		Log.info("%d", n);
+
+		int p = 0, p_tmp;
+		int i, j;
+		int[] v_array = new int[n];
+
+		for (i = 0; i < n; i++) {
+			v_array[i] = in.nextInt();
+			for (j = 0; j < i; j++) {
+				p_tmp = v_array[i] - v_array[j];
+				if (p_tmp < p)
+					p = p_tmp;
 			}
 		}
 
-		System.out.println(v_loss_max);
+		System.out.println(p);
 	}
 }
 
-class Model {
-	int[] stockValues;
-}
-
-class Game {
-	static Model init(Scanner in) {
-		Log.debug("INIT =======================");
-		Model m = new Model();
-		int n = in.nextInt();
-		Log.info("%d", n);
-		m.stockValues = new int[n];
-		String vs = "";
-		for (int i = 0; i < n; i++) {
-			int v = in.nextInt();
-			m.stockValues[i] = v;
-			vs += v + " ";
-		}
-		Log.info("%s", vs);
-		return m;
-	}
-}
 // UTILS
 
 class Log {
@@ -76,13 +57,5 @@ class Env {
 			if ("-debug".equals(arg))
 				Log.Level_DEBUG = true;
 		}
-	}
-}
-
-class Preconditions {
-
-	static void check(boolean condition) {
-		if (!condition)
-			throw new RuntimeException("CONDITION FALSE");
 	}
 }
