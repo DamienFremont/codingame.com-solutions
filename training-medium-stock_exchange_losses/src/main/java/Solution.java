@@ -7,8 +7,21 @@ class Solution {
 
 		Scanner in = new Scanner(System.in);
 		Model model = Game.init(in);
+		int[] vs = model.stockValues;
+		int v_loss_max = 0;
+		for (int i = 0; i < vs.length; i++) {
+			int v0 = vs[i];
+			Log.debug("for %d", v0);
+			for (int y = i + 1; y < vs.length; y++) {
+				int v1 = vs[y];
+				int v0v1_loss = v1 - v0;
+				Log.debug("  with %d diff=%d", v1, v0v1_loss);
+				if (v0v1_loss < v_loss_max)
+					v_loss_max = v0v1_loss;
+			}
+		}
 
-		System.out.println("answer");
+		System.out.println(v_loss_max);
 	}
 }
 
@@ -26,10 +39,9 @@ class Game {
 		String vs = "";
 		for (int i = 0; i < n; i++) {
 			int v = in.nextInt();
-			m.stockValues[i] = n;
+			m.stockValues[i] = v;
 			vs += v + " ";
 		}
-
 		Log.info("%s", vs);
 		return m;
 	}
@@ -64,24 +76,6 @@ class Env {
 			if ("-debug".equals(arg))
 				Log.Level_DEBUG = true;
 		}
-	}
-}
-
-class Point {
-	int x, y;
-
-	public Point(int x, int y) {
-		this.x = x;
-		this.y = y;
-	}
-}
-
-class Vector {
-	double x, y;
-
-	public Vector(double x, double y) {
-		this.x = x;
-		this.y = y;
 	}
 }
 
