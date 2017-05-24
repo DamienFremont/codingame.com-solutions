@@ -7,13 +7,11 @@ class Solution {
 
 		Log.info("INIT =======================");
 		Scanner in = new Scanner(System.in);
-		int n = in.nextInt();
-		Log.info("%d", n);
-		int p, v, vMin, vMax;
-
-		Log.info("SOLVE =======================");
-		p = 0;
+		int p = 0, v, vMin, vMax, n = in.nextInt();
 		v = vMin = vMax = in.nextInt();
+		Log.info("%d", n);
+		
+		Log.info("SOLVE =======================");
 		Log.debug("for %d p=%d v[%d..%d]", v, p, vMin, vMax);
 		for (int i = 1; i < n; i++) {
 			v = in.nextInt();
@@ -21,9 +19,8 @@ class Solution {
 				vMin = vMax = v;
 			} else if (v < vMin) {
 				vMin = v;
-				int loss = vMin - vMax;
-				if (loss < p)
-					p = loss;
+				if (vMin - vMax < p)
+					p = vMin - vMax;
 			}
 			Log.debug("for %d p=%d v[%d..%d]", v, p, vMin, vMax);
 		}
