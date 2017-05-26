@@ -7,6 +7,21 @@ https://www.codingame.com/
 
 ---
 
+## COMPETE
+
+### CONTEST
+- [Coders of the Caribbean](contests-coders_of_the_caribbean)
+
+### BOT PROGRAMMING
+- [Coders of the Caribbean](multiplayer-bot_programming-coders_of_the_caribbean)
+- [Ghost in the Cell](multiplayer-bot_programming-ghost_in_the_cell)
+- [Coders Strike Back](multiplayer-bot_programming-coders_strike_back)
+
+### CODE GOLF
+- [Don't Panic](multiplayer-codegolf-don_t_panic)
+- [Temperatures](multiplayer-codegolf-temperatures)
+- [Power of Thor](multiplayer-codegolf-power_of_thor)
+
 ## PRACTICE
 
 ### CLASSIC PUZZLE - MEDIUM
@@ -32,17 +47,3 @@ https://www.codingame.com/
 - [Onboarding](training-easy-onboarding)
 
 ---
-
-## COMPETE
-
-### CONTEST
-- [Coders of the Caribbean](contests-coders_of_the_caribbean)
-
-### BOT PROGRAMMING
-- [Ghost in the Cell](multiplayer-bot_programming-ghost_in_the_cell)
-- [Coders Strike Back](multiplayer-bot_programming-coders_strike_back)
-
-### CODE GOLF
-- [Don't Panic](multiplayer-codegolf-don_t_panic)
-- [Temperatures](multiplayer-codegolf-temperatures)
-- [Power of Thor](multiplayer-codegolf-power_of_thor)
