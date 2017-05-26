@@ -1,6 +1,8 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 class Solution {
@@ -11,57 +13,71 @@ class Solution {
 		Log.info("INIT =======================");
 		Scanner in = new Scanner(System.in);
 		int n = in.nextInt();
-		Log.info("%d", n);
 		Graph<Person> people = new Graph<>();
 		for (int i = 0; i < n; i++) {
 			Person p1 = findOrCreate(people, in.nextInt());
 			Person p2 = findOrCreate(people, in.nextInt());
 			p1.adjacents.add(p2);
 			p2.adjacents.add(p1);
-			Log.info("%d %d", p1.vertex, p2.vertex);
-		}
-		Log.debug("People Graph:");
-		Log.debug("  nodes=%d", people.vertices.size());
-		for (Person p : people.vertices) {
-			Log.debug("  Person Node(vertex=%s, adjacents=%s)", p.toString(), p.adjacents.stream() //
-					.map(i -> i.vertex).collect(Collectors.toList()));
 		}
 
 		Log.info("SOLVE =======================");
-
 		int steps = -1;
-		for (Person testNode : people.vertices) {
+		List<Person> candidates = new ArrayList<>(people.vertices);
+		Log.debug("candidates size=%s", people.vertices.size());
+
+		Comparator<? super Person> byAdjsSize = (p1, p2) -> Integer.compare(p1.adjacents.size(), p2.adjacents.size());
+		Predicate<? super Person> msgTrue = i -> i.message == true;
+		Predicate<? super Person> msgFalse = i -> i.message == false;
+
+		if (true) {
+			candidates = candidates.stream() //
+					.filter(i -> i.adjacents.size() > 1) //
+					.collect(Collectors.toList());
+			Log.debug("candidates filter>1=%s", candidates.size());
+		}
+		if (false) {
+			int avg = candidates.stream().collect(Collectors.averagingInt(i -> i.adjacents.size())).intValue();
+			int max = candidates.stream().max(byAdjsSize).get().adjacents.size();
+			Log.debug("avg=%d, max=%d", avg, max);
+			int filter = max - 1;
+			candidates = people.vertices.stream() //
+					.filter(i -> i.adjacents.size() > filter) //
+					.collect(Collectors.toList());
+			Log.debug("candidates filter>%d=%s", filter, candidates.size());
+		}
+		if (true) {
+			candidates.sort(byAdjsSize);
+
+			candidates = candidates.subList(0, candidates.size() > 500 ? 500 : candidates.size());
+			Log.debug("candidates sub=%s", candidates.size());
+
+		}
+		for (Person testNode : candidates) {
 			people.vertices.stream() //
 					.forEach(i -> i.message = false);
 			long propagandaCount = 0;
-			Log.debug("testNode=%s", testNode);
 			testNode.message = true;
-
 			int testSteps = 0;
-			while (propagandaCount < people.vertices.size() && testSteps < 10) {
-				Log.debug("  testSteps=%d", testSteps);
-				Log.debug("    propagandaCount=%d", propagandaCount);
+			while (propagandaCount < people.vertices.size() && testSteps < 16) {
 				List<Person> actualPeople = people.vertices.stream()//
-						.filter(i -> i.message == true) //
+						.filter(msgTrue) //
 						.collect(Collectors.toList());
-				Log.debug("    actualPeople=%s", actualPeople);
 				List<Person> nextPeople = new ArrayList<>();
 				actualPeople.forEach(i -> nextPeople //
 						.addAll( //
 								i.adjacents.stream() //
-										.filter(j -> j.message == false) //
+										.filter(msgFalse) //
 										.collect(Collectors.toList())));
-				Log.debug("    nextPeople=%s", nextPeople);
 				nextPeople.forEach(i -> i.message = true);
 				testSteps++;
 				propagandaCount = people.vertices.stream() //
-						.filter(i -> i.message == true) //
+						.filter(msgTrue) //
 						.count();
 			}
 			if (steps == -1 || testSteps < steps)
 				steps = testSteps;
 		}
-		Log.info("steps=%d", steps);
 
 		Log.info("ANSWER =======================");
 		System.out.println(steps);
