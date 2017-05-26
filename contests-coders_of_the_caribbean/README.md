@@ -8,6 +8,8 @@ https://www.codingame.com/contests/coders-of-the-caribbean
 This is a league based challenge.
 For this challenge, multiple versions of the same game are available. Once you have proven your skills on this first version, you will access a higher league and extra rules will be unlocked.
 
+![alt text](screenshots/ScreenShot000.png)
+
 ## The Goal
 
 In this game, you are in command of pirate ships and your goal is to avoid running out of rum. If all the rum dries up on a given ship, your crew will go mad and you will lose the ship. Barrels of rum are placed randomly across the map. You must control the movements of your ship in order to collect the barrels of rum before your opponent does.
