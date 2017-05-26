@@ -25,6 +25,7 @@ https://www.codingame.com/
 ## PRACTICE
 
 ### CLASSIC PUZZLE - MEDIUM
+- [Teads Sponsored Contest](training-medium-teads_sponsored_contest)
 - [The Last Crusade - Episode 1](training-medium-the_last_crusade_episode_1)
 - [Stock Exchange Losses](training-medium-stock_exchange_losses)
 - [Mars Lander - Episode 2](training-medium-mars_lander_episode_2)
