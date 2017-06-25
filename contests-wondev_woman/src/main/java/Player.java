@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 class Player {
@@ -14,9 +16,14 @@ class Player {
 
 		while (in.hasNext()) {
 			Log.info("TURN =======================");
+			int[][] grid = new int[size][size];
 			for (int i = 0; i < size; i++) {
 				String row = in.next();
 				Log.info("%s", row);
+				for (int j = 0; j < row.length(); j++) {
+//					Integer cell = Integer.valueOf(row.substring(j, j + 1));
+//					grid[i][j] = cell;
+				}
 			}
 			for (int i = 0; i < unitsPerPlayer; i++) {
 				int unitX = in.nextInt();
@@ -30,18 +37,26 @@ class Player {
 			}
 			int legalActions = in.nextInt();
 			Log.info("%d", legalActions);
+			List<String> actions = new ArrayList<>();
 			for (int i = 0; i < legalActions; i++) {
 				String atype = in.next();
 				int index = in.nextInt();
 				String dir1 = in.next();
 				String dir2 = in.next();
 				Log.info("%s %d %s %s", atype, index, dir1, dir2);
+				actions.add(String.format("%s %d %s %s",  atype, index, dir1, dir2));
 			}
 
 			Log.info("SOLVE =======================");
-
+			for (int i = 0; i < size; i++) {
+				Log.debug("%d %d %d %d %d", grid[i][0], grid[i][1], grid[i][2], grid[i][3], grid[i][4]);
+			}
+			// TODO next move
+			// TODO if legal
+			String action = actions.get(0);
+			
 			Log.info("ANSWER =======================");
-			System.out.println("MOVE&BUILD 0 N S");
+			System.out.println(action);
 		}
 	}
 
