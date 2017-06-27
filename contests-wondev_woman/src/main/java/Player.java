@@ -14,16 +14,14 @@ class Player {
 		Log.info("%d", size);
 		Log.info("%d", unitsPerPlayer);
 
+		String[] grid = new String[size];
+
 		while (in.hasNext()) {
 			Log.info("TURN =======================");
-			int[][] grid = new int[size][size];
 			for (int i = 0; i < size; i++) {
 				String row = in.next();
 				Log.info("%s", row);
-				for (int j = 0; j < row.length(); j++) {
-//					Integer cell = Integer.valueOf(row.substring(j, j + 1));
-//					grid[i][j] = cell;
-				}
+				grid[i] = row;
 			}
 			for (int i = 0; i < unitsPerPlayer; i++) {
 				int unitX = in.nextInt();
@@ -48,9 +46,6 @@ class Player {
 			}
 
 			Log.info("SOLVE =======================");
-			for (int i = 0; i < size; i++) {
-				Log.debug("%d %d %d %d %d", grid[i][0], grid[i][1], grid[i][2], grid[i][3], grid[i][4]);
-			}
 			// TODO next move
 			// TODO if legal
 			String action = actions.get(0);
