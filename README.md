@@ -6,6 +6,16 @@ https://www.codingame.com/
 ![alt text](screenshots/fiche_codingame_logo.png)
 
 ---
+## Why this project
+
+This project aims at sharing with the community those Java code I appreciate in the challenges and are helping you gain time, allowing you to develop in several files with a one click build, and sharing a common set of codes between challenges. Don't reinvent the wheel, focus on the subject!
+
+## for developers:
+
+Code uses the Java version 8.
+
+I use eclipse as IDE, and the projects include directly a Maven project. You can also use Maven to build project files for various IDE
+The source code is in the */src/main/java folder, and the tests are in the */src/test/java folder.
 
 ## COMPETE
 
