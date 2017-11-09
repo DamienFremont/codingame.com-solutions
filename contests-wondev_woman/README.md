@@ -1,9 +1,14 @@
-# codingame-training-medium-stock_exchange_losses
-4,236 CodinGamers have registered to this contest
+# contests-wondev_woman
+905 CodinGamers have registered to this contest
 
 https://www.codingame.com/contests/wondev-woman
 
 ![alt text](screenshots/ScreenShot001.png)
+
+This is a league based challenge.
+For this challenge, multiple versions of the same game are available. Once you have proven your skills on this first version, you will access a higher league and extra rules will be unlocked.
+
+![alt text](screenshots/ScreenShot002.png)
 
 ---
 
