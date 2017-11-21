@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,7 +17,6 @@ class Player {
 		model.area = new Area();
 		model.state = GameState.PLAY;
 		Bot bot = new Bot(model);
-		Log.info("%s", model.area);
 
 		// game loop
 		while (GameState.PLAY == model.state) {
@@ -38,6 +39,149 @@ class Player {
 	}
 }
 
+// IMPL *************************************************************
+
+class Bot {
+	Model model;
+
+	Bot(Model model) {
+		this.model = model;
+	}
+
+	Output computeOutput() {
+		Output out = new Output();
+		out.actions = new ArrayList<>();
+
+		if (GameState.END == model.state)
+			return out;
+
+		out.actions.add(actionReaper());
+		out.actions.add(actionDestroyer());
+
+		// TODO NEXT LEAGUE
+		Action a = new Action();
+		a.wait = true;
+		out.actions.add(a);
+		return out;
+	}
+
+	Action actionDestroyer() {
+		Log.info("actionDestroyer");
+		Action a = new Action();
+		a.wait = true;
+
+		if (model.myDestroyers.isEmpty())
+			return a;
+
+		Unit source = getSource(model.myDestroyers);
+		Unit target = getTarget(source, model.enemiesReapers);
+		int throttle = getThrottle(source, target);
+
+		a.wait = false;
+		a.throttle = throttle;
+		a.x = target.x;
+		a.y = target.y;
+
+		return a;
+	}
+
+	Action actionReaper() {
+		Log.info("actionReaper");
+		Action a = new Action();
+		a.wait = true;
+
+		if (model.wrecks.isEmpty())
+			return a;
+		if (model.myReapers.isEmpty())
+			return a;
+
+		Unit source = getSource(model.myReapers);
+		Unit target = getTarget(source, model.wrecks);
+		int throttle = getThrottle(source, target);
+
+		a.wait = false;
+		a.throttle = throttle;
+		a.x = target.x;
+		a.y = target.y;
+
+		return a;
+	}
+
+	int getThrottle(Unit source, Unit target) {
+		int distanceBetween = (int) Maths.distanceBetween(map(source), map(target));
+		Log.info("...distanceBetween=%d", distanceBetween);
+		int distanceToStop = distanceToStop(source, target);
+		Log.info("...distanceToStop=%d", distanceToStop);
+		int throttle = (distanceBetween > distanceToStop) ? //
+				model.unitRules.get(source.unitType).throttle : //
+				model.stopThrottle;
+		return throttle;
+	}
+
+	Unit getTarget(Unit source, List<Unit> list) {
+		for (Unit w : list)
+			Log.info("... ...candidate %s d=%d", map(w), (int) Maths.distanceBetween(map(source), map(w)));
+		Unit target = findNextTarget(map(source), list);
+		Point2D targetPt = map(target);
+		Log.info("...target %s", targetPt);
+		return target;
+	}
+
+	Unit getSource(List<Unit> list) {
+		Unit source = list.stream() //
+				.findFirst() //
+				.get();
+		Point2D sourcePt = map(source);
+		Log.info("...source %s", sourcePt);
+		return source;
+	}
+
+	// TODO water level
+	// TODO avoid enemy
+	private Unit findNextTarget(Point2D sourcePt, List<Unit> candidates) {
+		Unit target = candidates.stream() //
+				.findFirst() //
+				.get();
+		for (Unit candidate : candidates) {
+			int candidateDistance = (int) Maths.distanceBetween(sourcePt, map(candidate));
+			int actualDistance = (int) Maths.distanceBetween(sourcePt, map(target));
+			boolean isNearest = (candidateDistance < actualDistance);
+			boolean isWaterEnough = candidate.extra > model.minWaterLevel;
+			if (isNearest && isWaterEnough)
+				target = candidate;
+		}
+		return target;
+	}
+
+	static int nearest(Unit e1, Unit e2) {
+		return (int) Maths.distanceBetween(map(e1), map(e2));
+	}
+
+	static Point2D map(Unit u) {
+		return new Point2D(u.x, u.y);
+	}
+
+	int distanceToStop(Unit source, Unit target) {
+		double f = model.unitRules.get(source.unitType).friction;
+		Vector2D vector = new Vector2D(source.vx, source.vy);
+		double v = vector.length();
+		Log.info("...distanceToStop args: v=%f, f=%f", v, f);
+		int d = 0;
+		while (v > model.minThrottle) {
+			d += v;
+			v = nextTurnVelocity(v, f);
+			Log.info("... ...computing distanceToStop: d=%d v=%f", d, v);
+		}
+		return d;
+	}
+
+	double nextTurnVelocity(double v, double friction) {
+		v = v * (1 - friction);
+		return v;
+	}
+
+}
+
 // MODEL *************************************************************
 
 class Model {
@@ -45,9 +189,26 @@ class Model {
 	Area area;
 	Info info;
 	List<Unit> units, //
-			wrecks, reapers, //
-			myReapers;
+			wrecks, //
+			myUnits, myReapers, myDestroyers, //
+			enemies, enemiesReapers;
 	GameState state;
+
+	int minThrottle = 10;
+	int stopThrottle = 0;
+	int minWaterLevel = 2;
+
+	Map<UnitType, UnitRule> unitRules = initRules();
+
+	static Map<UnitType, UnitRule> initRules() {
+		Map<UnitType, UnitRule> map = new HashMap<>();
+		map.put(UnitType.REAPER, new UnitRule(UnitType.REAPER, 300, 0.5f, 0.2f));
+		map.put(UnitType.DESTROYER, new UnitRule(UnitType.DESTROYER, 300, 1.5f, 0.3f));
+		map.put(UnitType.DOOF, new UnitRule(UnitType.DOOF, 300, 1.0f, 0.25f));
+		map.put(UnitType.TANKER, new UnitRule(UnitType.TANKER, 500, 2.5f, 0.4f));
+		map.put(UnitType.WRECK, new UnitRule(UnitType.WRECK, -1, -1, -1));
+		return map;
+	}
 }
 
 enum GameState {
@@ -60,18 +221,22 @@ class Info {
 	int unitCount;
 }
 
+class UnitRule {
+	UnitType type;
+	int throttle;
+	float mass;
+	float friction;
+
+	UnitRule(UnitType type, int throttle, float mass, float friction) {
+		this.type = type;
+		this.throttle = throttle;
+		this.mass = mass;
+		this.friction = friction;
+	}
+}
+
 class Area {
 	int radius = 6000;
-	int maxThrottle = 300;
-	int minThrottle = 10;
-	int stopThrottle = 0;
-	double friction = 0.2;
-
-	@Override
-	public String toString() {
-		return String.format("Area: radius=%d maxThrottle=%d minThrottle=%d", //
-				radius, maxThrottle, minThrottle);
-	}
 }
 
 class Unit {
@@ -87,7 +252,7 @@ class Unit {
 }
 
 enum UnitType {
-	REAPER(0), WRECK(4);
+	REAPER(0), DESTROYER(1), DOOF(2), TANKER(3), WRECK(4);
 
 	final int value;
 
@@ -120,110 +285,7 @@ class Action {
 	}
 }
 
-// IMPL *************************************************************
-
-class Bot {
-	Model model;
-
-	Bot(Model model) {
-		this.model = model;
-	}
-
-	Output computeOutput() {
-		Output out = new Output();
-		out.actions = new ArrayList<>();
-
-		if (GameState.END == model.state)
-			return out;
-
-		Action a = computeAction();
-		out.actions.add(a);
-
-		// TODO NEXT LEAGUE
-		a = new Action();
-		a.wait = true;
-		out.actions.add(a);
-		out.actions.add(a);
-		return out;
-	}
-
-	Action computeAction() {
-
-		Unit source = model.myReapers.stream() //
-				.findFirst() //
-				.get();
-		Point2D sourcePt = map(source);
-		Log.info("source reaper %s", sourcePt);
-
-		for (Unit w : model.wrecks)
-			Log.info("...candidate wrecks %s d=%d", map(w), (int) Maths.distanceBetween(sourcePt, map(w)));
-
-		Unit target = findNextTarget(sourcePt);
-
-		Point2D targetPt = map(target);
-		Log.info("target wreck %s", targetPt);
-
-		int distanceBetween = (int) Maths.distanceBetween(sourcePt, targetPt);
-		Log.info("distanceBetween=%d", distanceBetween);
-
-		int distanceToStop = distanceToStop(source, target);
-		Log.info("distanceToStop=%d", distanceToStop);
-
-		int throttle = (distanceBetween > distanceToStop) ? //
-				model.area.maxThrottle : //
-				model.area.stopThrottle;
-
-		Action a = new Action();
-		a.wait = false;
-		a.throttle = throttle;
-		a.x = targetPt.x;
-		a.y = targetPt.y;
-
-		return a;
-	}
-
-	// TODO water level
-	private Unit findNextTarget(Point2D sourcePt) {
-		Unit target = model.wrecks.stream() //
-				.findFirst() //
-				.get();
-		for (Unit candidate : model.wrecks) {
-			int candidateDistance = (int) Maths.distanceBetween(sourcePt, map(candidate));
-			int actualDistance = (int) Maths.distanceBetween(sourcePt, map(target));
-			if (candidateDistance < actualDistance)
-				target = candidate;
-		}
-		return target;
-	}
-
-	static int nearest(Unit e1, Unit e2) {
-		return (int) Maths.distanceBetween(map(e1), map(e2));
-	}
-
-	static Point2D map(Unit u) {
-		return new Point2D(u.x, u.y);
-	}
-
-	int distanceToStop(Unit reaper, Unit target) {
-		double friction = model.area.friction;
-		Vector2D vector = new Vector2D(reaper.vx, reaper.vy);
-		double v = vector.length();
-		Log.info("source reaper velocity=%f", v);
-		int d = 0;
-		while (v > model.area.minThrottle) {
-			d += v;
-			v = nextTurnVelocity(v, friction);
-			Log.info("...computing distanceToStop: d=%d v=%f", d, v);
-		}
-		return d;
-	}
-
-	double nextTurnVelocity(double v, double friction) {
-		v = v * (1 - friction);
-		return v;
-	}
-
-}
+// DATA *************************************************************
 
 class Data {
 
@@ -295,16 +357,31 @@ class Data {
 	}
 
 	static void prepare(Model model) {
-		model.reapers = model.units.stream() //
-				.filter(i -> (UnitType.REAPER == i.unitType)) //
-				.collect(Collectors.toList());
 		model.wrecks = model.units.stream() //
 				.filter(i -> (UnitType.WRECK == i.unitType)) //
 				.collect(Collectors.toList());
 
-		model.myReapers = model.reapers.stream() //
+		model.myUnits = model.units.stream() //
 				.filter(i -> model.me == i.player) //
 				.collect(Collectors.toList());
+		model.myReapers = model.myUnits.stream() //
+				.filter(i -> (UnitType.REAPER == i.unitType)) //
+				.collect(Collectors.toList());
+		model.myDestroyers = model.myUnits.stream() //
+				.filter(i -> (UnitType.DESTROYER == i.unitType)) //
+				.collect(Collectors.toList());
+
+		model.enemies = model.units.stream() //
+				.filter(i -> model.me != i.player) //
+				.collect(Collectors.toList());
+		model.enemiesReapers = model.enemies.stream() //
+				.filter(i -> (UnitType.REAPER == i.unitType)) //
+				.collect(Collectors.toList());
+
+		Log.info("units %d", model.units.size());
+		Log.info("wrecks %d", model.wrecks.size());
+		Log.info("myReapers %d", model.myReapers.size());
+		Log.info("myDestroyers %d", model.myDestroyers.size());
 	}
 }
 
