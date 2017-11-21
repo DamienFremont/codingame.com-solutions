@@ -22,7 +22,7 @@ The source code is in the */src/main/java folder, and the tests are in the */src
 ### CONTEST
 - [Coders of the Caribbean](contests-coders_of_the_caribbean)
 - [Wondev Woman](contests-wondev_woman)
-- [Mean Max](contests-contests-mean_max)
+- [Mean Max](contests-mean_max)
 
 ### BOT PROGRAMMING
 - [Coders of the Caribbean](multiplayer-bot_programming-coders_of_the_caribbean)
