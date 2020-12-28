@@ -1,4 +1,9 @@
-# CODINGAME
+CODINGAME
+=========
+
+[![Twitter Follow](https://img.shields.io/twitter/follow/Damien_Fremont?style=social)](https://twitter.com/Damien_Fremont)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 My code to compete at CodingGame.
 
 https://www.codingame.com/
