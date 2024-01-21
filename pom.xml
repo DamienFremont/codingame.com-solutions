@@ -9,6 +9,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>project-starter</module>
     <module>contests-coders_of_the_caribbean</module>
     <module>contests-mean_max</module>
 <!--    <module>contests-wondev_woman</module>--> <!--TODO: TESTS ERRORS -->
