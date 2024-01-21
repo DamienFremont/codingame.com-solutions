@@ -9,6 +9,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class SolutionExecutor {
 
   public static String watchSolution(Runnable classUnderTest, String inputArgument) {
+    var result = "";
     var oldIn = System.in;
     var oldOut = System.out;
     try {
@@ -18,12 +19,15 @@ public class SolutionExecutor {
       System.setIn(inMock);
       System.setOut(outMock);
       classUnderTest.run();
-      var result = new String(outCaptor.toByteArray(), UTF_8);
-//      return result.substring(0, result.length() - 1);
-      return result;
+      result = new String(outCaptor.toByteArray(), UTF_8);
     } finally {
       System.setIn(oldIn);
       System.setOut(oldOut);
     }
+    System.out.println("inputArgument:");
+    System.out.println(result);
+    System.out.println("outputResult");
+    System.out.println(result);
+    return result;
   }
 }

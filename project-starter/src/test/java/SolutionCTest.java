@@ -6,17 +6,16 @@ import static common.TestHelper.inputFile;
 import static common.TestHelper.outputFile;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SolutionBTest {
+public class SolutionCTest {
 
   @ParameterizedTest
   @CsvSource({
-          "B_01",
-          "B_02",
+          "C_01",
   })
   void test_case_01(String testId) {
     assertThat(
             watchSolution(
-                    () -> SolutionB.main(new String[]{"-debug"}),
+                    () -> SolutionC.main(new String[]{"-debug"}),
                     inputFile(testId)))
             .isEqualTo(outputFile(testId));
   }
