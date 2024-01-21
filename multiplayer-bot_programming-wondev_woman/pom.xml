@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.damienfremont.codingame</groupId>
-	<artifactId>codingame-contests-wondev_woman</artifactId>
+	<artifactId>codingame-multiplayer-bot_programming-wondev_woman</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 

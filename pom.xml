@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.damienfremont.codingame</groupId>
+  <artifactId>codingame</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>contests-coders_of_the_caribbean</module>
+    <module>contests-mean_max</module>
+<!--    <module>contests-wondev_woman</module>--> <!--TODO: TESTS ERRORS -->
+    <module>multiplayer-bot_programming-coders_of_the_caribbean</module>
+    <module>multiplayer-bot_programming-coders_strike_back</module>
+<!--    <module>multiplayer-bot_programming-ghost_in_the_cell</module>--> <!--TODO: TESTS ERRORS -->
+<!--    <module>multiplayer-bot_programming-wondev_woman</module>--> <!--TODO: TESTS ERRORS -->
+    <module>multiplayer-codegolf-don_t_panic</module>
+    <module>multiplayer-codegolf-power_of_thor</module>
+    <module>multiplayer-codegolf-temperatures</module>
+    <module>training-easy-ascii_art</module>
+    <module>training-easy-chuck_norris</module>
+    <module>training-easy-defibrillators</module>
+    <module>training-easy-horse_racing_duals</module>
+    <module>training-easy-mars_lander_episode_1</module>
+    <module>training-easy-mime_type</module>
+    <module>training-easy-onboarding</module>
+    <module>training-easy-power_of_thor-episode_1</module>
+    <module>training-easy-temperatures</module>
+    <module>training-easy-the_descent</module>
+    <module>training-medium-don_t_panic_episode_1</module>
+    <module>training-medium-mars_lander_episode_2</module>
+    <module>training-medium-shadows_of_the_knight_episode_1</module>
+    <module>training-medium-skynet_revolution_episode_1</module>
+    <module>training-medium-stock_exchange_losses</module>
+    <module>training-medium-teads_sponsored_contest</module>
+    <module>training-medium-the_last_crusade_episode_1</module>
+    <module>training-medium-there_is_no_spoon_episode_1</module>
+    <module>training-medium-war</module>
+  </modules>
+
+</project>
